@@ -261,6 +261,7 @@ class Report:
         X: np.ndarray,
         y: np.ndarray,
         param_name: str,
+        param_range = np.logspace(-6, -1, 5),
         ylabel: str = "Score",
         filename: str = "validation_curve.png",
         img_title: str = "Validation Curve",
@@ -268,7 +269,6 @@ class Report:
         **kwargs,
     ):
         """Print validation curve plot of the given model."""
-        param_range = np.logspace(-6, -1, 5)
         train_scores, test_scores = validation_curve(
             model, X, y, param_name=param_name, param_range=param_range,
             scoring="accuracy", n_jobs=-1)
