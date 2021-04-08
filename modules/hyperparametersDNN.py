@@ -68,6 +68,8 @@ def get_hyperparams(model):
 
 def save_history(history, historial_train, historial_test, metric="accuracy"):
     """Save and return history extension of the metric selected for the model"""
+    if "accuracy" not in history.history:
+        metric = "loss"
     historial_train.extend(history.history[metric])
     historial_test.extend(history.history["val_" + metric])
 
@@ -84,7 +86,7 @@ def get_best_DNN(
     batch_size=40,
     metrics="accuracy",
 ):
-    """This function trains the current model using cross validation and register its score coparing with new ones in each trial"""
+    """This function trains the current model using cross validation and register its score comparing with new ones in each trial"""
     # Its needed the accuracy metric, if it is not passed it will be auto-included
     if "accuracy" not in metrics:
         metrics.append("accuracy")
@@ -125,8 +127,8 @@ def get_best_DNN(
                 X_train,
                 t_train,
                 validation_data=(X_test, t_test),
-                epochs=100,
-                batch_size=40,
+                epochs=epochs,
+                batch_size=batch_size,
                 verbose=0,
             )
             # Save the train and test results,of the current model
@@ -141,6 +143,9 @@ def get_best_DNN(
             fold += 1
         # Criterion to choose the best model with the highest accuracy score in validation
         means = np.mean(mean_folds)
+        print(
+            f"\n\tMin. Train score: {min(historial_train)} | Max. Train score: {max(historial_train)}"
+        )
         if means > last_mean:
             # Save the model and its historial results
             best_model = (model, historial_train, historial_test)
