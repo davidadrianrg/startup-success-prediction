@@ -7,6 +7,8 @@ import pandas as pd
 from test import old_preprocessing as oldpr
 from modules.postprocessing import Report
 from modules import preprocessing as prp
+from modules import hyperparametersTunning as hpt
+from modules import hyperparametersDNN as hpdnn
 
 
 def make_report_test():
@@ -116,6 +118,15 @@ def make_preprocessing(filepath: str) -> pd.DataFrame:
 
 def train_models(X: pd.DataFrame, t: pd.DataFrame):
     """Train different models using the dataset and its labels."""
+    models = hpt.select_models()
+    # Get best models with optimized hyperparameters
+    best_models = hpt.optimizing_models(models, X, t)
+    # Plot the results
+    hpt.plot_best_model(best_models)
+    # Get the best DNN model optimizing hyperparameters
+    best_dnn = hpdnn.get_best_DNN(X, t)
+    # Plot the results
+    hpdnn.plot_best_DNN(best_dnn)
     
 
 def make_report():
