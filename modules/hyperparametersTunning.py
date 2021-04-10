@@ -1,6 +1,5 @@
-"""Module to optimize hyperparameters and get the best Models"""
+"""Module to optimize hyperparameters and get the best Models."""
 
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -13,8 +12,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, cross_validate
 
 
@@ -23,7 +20,7 @@ def warn(*args, **kwargs):
 
 
 def select_models(LR=True, LDA=True, KNN=True, SVC=True):
-    # This is a list which contains the tags of the models that are going to be tested for the best
+    """Create a list which contains the tags of the models that are going to be tested for the best."""
     models = []
     if LR:
         models.append("LR")
@@ -42,6 +39,7 @@ def create_random_LR(
     max_iter=[100, 1000],
     C=[1e-5, 10],
 ):
+    """Create a Logistic Regression model using random hyperparameters."""
     model = LogisticRegression(
         penalty=random.choice(penalty),
         solver=random.choice(solver),
@@ -56,12 +54,11 @@ def create_random_LDA(
     shrinkage=["auto", round(random.uniform(1e-5, 1), 5), "none"],
     tol=[1e-5, 1e-3],
 ):
+    """Create a Linear Discriminant model using random hyperparameters."""
     model = LinearDiscriminantAnalysis(
         solver=random.choice(solver),
         shrinkage=random.choice(shrinkage),
-        tol=round(
-            loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))
-        ),
+        tol=round(loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))),
     )
     return model
 
@@ -72,6 +69,7 @@ def create_random_KNN(
     algorithm=["auto", "ball_tree", "kd_tree", "brute"],
     leaf_size=[15, 150],
 ):
+    """Create a KNN model using random hyperparameters."""
     model = KNeighborsClassifier(
         n_neighbors=random.randint(n_neighbors[0], n_neighbors[1]),
         weights=random.choice(weights),
@@ -87,6 +85,7 @@ def create_random_SVC(
     C=[1e-5, 10],
     decision_function_shape=["ovo", "ovr"],
 ):
+    """Create a SVC model using random hyperparameters."""
     model = SVC(
         kernel=random.choice(kernel),
         gamma=random.choice(gamma),
@@ -97,11 +96,13 @@ def create_random_SVC(
 
 
 def build_macro_model(model, scaler=StandardScaler()):
+    """Create a macro model pipeline using the given scaler."""
     macro_model = make_pipeline(scaler, model)
     return macro_model
 
 
 def random_model(tag):
+    """Create a randon model of the given tag and returns it."""
     if tag == "LR":
         model = create_random_LR()
     if tag == "LDA":
@@ -122,15 +123,13 @@ def optimizing_models(
     cv=20,
     trials=25,
 ):
-
+    """Optimize hyperparameters of the given model and returns the best of them."""
     if "accuracy" not in scoring:
         scoring["accuracy"] = "accuracy"
 
     warnings.warn = warn
     best_models = dict()
-    X_train, X_test, t_train, t_test = train_test_split(
-        X, t, test_size=test_size
-    )
+    X_train, X_test, t_train, t_test = train_test_split(X, t, test_size=test_size)
     for tag in models:
         last_accuracy = 0
         print(f"\n***Optimizing {tag} hyperparameters***")
@@ -165,7 +164,7 @@ def optimizing_models(
 
 
 def plot_best_model(best_models, tag="LR"):
-    """Plots the validation curve of the model using its historial results"""
+    """Plot the validation curve of the model using its historial results."""
     plt.plot(best_models[tag][0])
     plt.plot(best_models[tag][1])
     plt.title("Model Accuracy")
