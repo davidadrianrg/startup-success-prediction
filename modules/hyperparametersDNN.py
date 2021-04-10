@@ -1,13 +1,11 @@
-"""Module with utils functions to optimize hyperparameters and get the best DNN model"""
+"""Module with utils functions to optimize hyperparameters and get the best DNN model."""
 
-import pandas as pd
 import numpy as np
 import random
 import math
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, KFold
 from tensorflow import keras
-from tensorflow.keras import layers, models
 from keras.utils import to_categorical
 from scipy.stats import loguniform
 
@@ -20,7 +18,7 @@ def create_random_network(
     activation=["relu", "sigmoid"],
     lr=[1e-5, 1e-3],
 ):
-    """Return a deep neural network model with pseudo-random hyperparameters according to its args, each time it is called"""
+    """Return a deep neural network model with pseudo-random hyperparameters according to its args, each time it is called."""
     # Defining the model class Sequential in order to add layers one by one
     model = keras.models.Sequential()
     # First layer of de network
@@ -44,19 +42,15 @@ def create_random_network(
     # Select the Adam optimizer as a general option due to its ability to leave saddle points
     # Choosing a learning rate from a logarithmic uniform distrbution
     optimizer = keras.optimizers.Adam(
-        learning_rate=round(
-            loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10)))
-        )
+        learning_rate=round(loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10))))
     )
     # Define some characteristics for the training process, using categorical crossentropy as the function error
-    model.compile(
-        loss="categorical_crossentropy", optimizer=optimizer, metrics=metrics
-    )
+    model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=metrics)
     return model
 
 
 def get_hyperparams(model):
-    """Return the hyperparams of the model passed as an argument"""
+    """Return the hyperparams of the model passed as an argument."""
     neurons = dict()
     nlayers = len(model.layers)
     for i in range(nlayers):
@@ -67,7 +61,7 @@ def get_hyperparams(model):
 
 
 def save_history(history, historial_train, historial_test, metric="accuracy"):
-    """Save and return history extension of the metric selected for the model"""
+    """Save and return history extension of the metric selected for the model."""
     if "accuracy" not in history.history:
         metric = "loss"
     historial_train.extend(history.history[metric])
@@ -86,7 +80,7 @@ def get_best_DNN(
     batch_size=40,
     metrics="accuracy",
 ):
-    """This function trains the current model using cross validation and register its score comparing with new ones in each trial"""
+    """Train the current model using cross validation and register its score comparing with new ones in each trial."""
     # Its needed the accuracy metric, if it is not passed it will be auto-included
     if "accuracy" not in metrics:
         metrics.append("accuracy")
@@ -94,6 +88,8 @@ def get_best_DNN(
     cv = KFold(kfolds)
     last_mean = 0
     last_trained = 0
+    n, m = X.shape
+    n_classes = len(np.unique(t))
 
     # Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it
     X_train_set, X_test, t_train_set, t_test = train_test_split(
@@ -154,7 +150,7 @@ def get_best_DNN(
 
 
 def plot_best_DNN(best_model):
-    """Plots the validation curve of the model using its historial results"""
+    """Plot the validation curve of the model using its historial results."""
     plt.plot(best_model[1])
     plt.plot(best_model[2])
     plt.title("Model Accuracy")
@@ -164,7 +160,8 @@ def plot_best_DNN(best_model):
     plt.show()
 
 
-"""Example of code
+"""
+Example of code
 X = pd.read_csv("X.csv")
 X = X.drop(["Unnamed: 0"], axis=1).values
 t = pd.read_csv("t.csv")
@@ -173,4 +170,5 @@ n, m = X.shape
 n_classes = len(np.unique(t))
 
 best = get_best_DNN(X, t)
-plot_best_DNN(best)"""
+plot_best_DNN(best)
+"""
