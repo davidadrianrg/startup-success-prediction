@@ -1,11 +1,10 @@
-"""Module with utils functions to optimize hyperparameters and get the best DNN model"""
+"""Module with utils functions to optimize hyperparameters and get the best DNN model."""
 
-import pandas as pd
 import numpy as np
 import random
 import math
 import matplotlib.pyplot as plt
-
+import pandas as pd
 import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -13,7 +12,6 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import customized_metrics as cm
 from sklearn.model_selection import train_test_split, KFold
 from tensorflow import keras
-from tensorflow.keras import layers, models
 from keras.utils import to_categorical
 from scipy.stats import loguniform
 
@@ -29,7 +27,7 @@ def create_random_network(
     optimizer=keras.optimizers.Adam,
     loss="categorical_crossentropy",
 ):
-    """Return a deep neural network model with pseudo-random hyperparameters according to its args, each time it is called"""
+    """Return a deep neural network model with pseudo-random hyperparameters according to its args, each time it is called."""
     # Defining the model class Sequential in order to add layers one by one
     model = keras.models.Sequential()
     # First layer of de network
@@ -108,7 +106,7 @@ def optimize_DNN(
         "AUC",
     ],
 ):
-    """This function trains the current model using cross validation and register its score comparing with new ones in each trial"""
+    """Train the current model using cross validation and register its score comparing with new ones in each trial."""
     # Its needed the accuracy metric, if it is not passed it will be auto-included
     if "accuracy" not in metrics:
         metrics.append("accuracy")
@@ -118,6 +116,8 @@ def optimize_DNN(
     cv = KFold(kfolds)
     last_mean = 0
     last_trained = 0
+    n, m = X.shape
+    n_classes = len(np.unique(t))
 
     # Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it
     X_train_set, X_test, t_train_set, t_test = train_test_split(
@@ -186,7 +186,8 @@ def plot_best_DNN(best_model, metric):
     plt.show()
 
 
-"""Example of code
+"""
+Example of code
 X = pd.read_csv("X.csv")
 X = X.drop(["Unnamed: 0"], axis=1).values
 t = pd.read_csv("t.csv")
