@@ -9,7 +9,7 @@ import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-import customized_metrics as cm
+from models import customized_metrics as cm
 from sklearn.model_selection import train_test_split, KFold
 from tensorflow import keras
 from keras.utils import to_categorical
@@ -20,10 +20,10 @@ def create_random_network(
     m,
     n_classes,
     metrics="accuracy",
-    layers=[1, 5],
-    n=[10, 20],
-    activation=["relu", "sigmoid"],
-    lr=[1e-5, 1e-3],
+    layers=(1, 5),
+    n=(10, 20),
+    activation=("relu", "sigmoid"),
+    lr=(1e-5, 1e-3),
     optimizer=keras.optimizers.Adam,
     loss="categorical_crossentropy",
 ):
@@ -97,14 +97,14 @@ def optimize_DNN(
     trials=5,
     epochs=50,
     batch_size=40,
-    metrics=[
+    metrics=(
         "accuracy",
         "Recall",
         cm.specificity,
         "Precision",
         cm.f1_score,
         "AUC",
-    ],
+    ),
 ):
     """Train the current model using cross validation and register its score comparing with new ones in each trial."""
     # Its needed the accuracy metric, if it is not passed it will be auto-included
