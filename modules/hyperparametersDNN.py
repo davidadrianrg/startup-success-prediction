@@ -5,6 +5,12 @@ import numpy as np
 import random
 import math
 import matplotlib.pyplot as plt
+
+import os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+import customized_metrics as cm
 from sklearn.model_selection import train_test_split, KFold
 from tensorflow import keras
 from tensorflow.keras import layers, models
@@ -14,11 +20,14 @@ from scipy.stats import loguniform
 
 def create_random_network(
     m,
+    n_classes,
     metrics="accuracy",
     layers=[1, 5],
     n=[10, 20],
     activation=["relu", "sigmoid"],
     lr=[1e-5, 1e-3],
+    optimizer=keras.optimizers.Adam,
+    loss="categorical_crossentropy",
 ):
     """Return a deep neural network model with pseudo-random hyperparameters according to its args, each time it is called"""
     # Defining the model class Sequential in order to add layers one by one
@@ -40,57 +49,72 @@ def create_random_network(
                 random.randint(n[0], n[1]), activation=random.choice(activation)
             )
         )
-    model.add(keras.layers.Dense(2, activation="softmax"))
-    # Select the Adam optimizer as a general option due to its ability to leave saddle points
+    model.add(keras.layers.Dense(n_classes, activation="softmax"))
     # Choosing a learning rate from a logarithmic uniform distrbution
-    optimizer = keras.optimizers.Adam(
+    optimizer = optimizer(
         learning_rate=round(
             loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10)))
         )
     )
-    # Define some characteristics for the training process, using categorical crossentropy as the function error
-    model.compile(
-        loss="categorical_crossentropy", optimizer=optimizer, metrics=metrics
-    )
+    # Define some characteristics for the training process
+    model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
     return model
 
 
 def get_hyperparams(model):
     """Return the hyperparams of the model passed as an argument"""
-    neurons = dict()
+    neurons = []
+    activation = []
+    layers = []
     nlayers = len(model.layers)
+
     for i in range(nlayers):
-        neurons["l" + str(i)] = model.layers[i].units
+        neurons.append(model.layers[i].units)
+        activation.append(model.layers[i].get_config()["activation"])
+        layers.append("layer " + str(i))
     lr = model.optimizer.learning_rate.value().numpy()
-    params = {"nlayers": nlayers, "neurons": neurons, "lr": lr}
-    return params
+    params = {
+        "neurons": neurons,
+        "activation": activation,
+    }
+    comp = {"optimizer": model.optimizer.get_config()["name"], "lr": lr}
+    dfparams = pd.DataFrame(params, index=layers)
+    dfcomp = pd.DataFrame(comp, index=["compiler"])
+
+    return dfparams, dfcomp
 
 
-def save_history(history, historial_train, historial_test, metric="accuracy"):
-    """Save and return history extension of the metric selected for the model"""
-    if "accuracy" not in history.history:
-        metric = "loss"
-    historial_train.extend(history.history[metric])
-    historial_test.extend(history.history["val_" + metric])
-
-    return historial_train, historial_test
+def split_history_metrics(historial):
+    d = {}
+    for k in historial[0].keys():
+        d[k] = [d[k] for d in historial]
+    return d
 
 
-def get_best_DNN(
+def optimize_DNN(
     X,
     t,
-    kfolds=5,
+    kfolds=10,
     train_size=0.85,
     trials=5,
-    epochs=100,
+    epochs=50,
     batch_size=40,
-    metrics="accuracy",
+    metrics=[
+        "accuracy",
+        "Recall",
+        cm.specificity,
+        "Precision",
+        cm.f1_score,
+        "AUC",
+    ],
 ):
     """This function trains the current model using cross validation and register its score comparing with new ones in each trial"""
     # Its needed the accuracy metric, if it is not passed it will be auto-included
     if "accuracy" not in metrics:
         metrics.append("accuracy")
 
+    n, m = X.shape
+    n_classes = len(np.unique(t))
     cv = KFold(kfolds)
     last_mean = 0
     last_trained = 0
@@ -103,39 +127,35 @@ def get_best_DNN(
     # Loop for different trials or models to train in order to find the best
     for row in range(trials):
 
-        model = create_random_network(m, metrics)
-        params = get_hyperparams(model)
+        model = create_random_network(m, n_classes, metrics=metrics)
+        params, comp = get_hyperparams(model)
 
         print(f"\n***Trial {row+1} hyperparameters***", end="\n\n")
-        print(params)
+        print(params, "\n", comp)
         fold = 1
         # Lists to store historical data and means per fold for models
-        historial_train = []
-        historial_test = []
+        historial = []
         mean_folds = []
 
         # Loop that manage cross validation using training set
         for train_index, test_index in cv.split(X_train_set):
-            X_train, X_test = X_train_set[train_index], X_train_set[test_index]
-            t_train, t_test = t_train_set[train_index], t_train_set[test_index]
+            X_train, X_val = X_train_set[train_index], X_train_set[test_index]
+            t_train, t_val = t_train_set[train_index], t_train_set[test_index]
 
             t_train = to_categorical(t_train, num_classes=n_classes)
-            t_test = to_categorical(t_test, num_classes=n_classes)
+            t_val = to_categorical(t_val, num_classes=n_classes)
 
             # Training of the model
             history = model.fit(
                 X_train,
                 t_train,
-                validation_data=(X_test, t_test),
+                validation_data=(X_val, t_val),
                 epochs=epochs,
                 batch_size=batch_size,
                 verbose=0,
             )
             # Save the train and test results,of the current model
-            historial_train, historial_test = save_history(
-                history, historial_train, historial_test
-            )
-
+            historial.append(history.history)
             mean = np.mean(history.history["val_accuracy"])
             mean_folds.append(mean)
 
@@ -143,22 +163,24 @@ def get_best_DNN(
             fold += 1
         # Criterion to choose the best model with the highest accuracy score in validation
         means = np.mean(mean_folds)
+        history_metrics = split_history_metrics(historial)
         print(
-            f"\n\tMin. Train score: {min(historial_train)} | Max. Train score: {max(historial_train)}"
+            f"\n\tMin. Train score: {min(np.concatenate(history_metrics['accuracy']))} | Max. Train score: {max(np.concatenate(history_metrics['accuracy']))}"
         )
         if means > last_mean:
             # Save the model and its historial results
-            best_model = (model, historial_train, historial_test)
+            best_model = (model, history_metrics)
+            test_set = (X_test, t_test)
             last_mean = means
-    return best_model
+    return best_model, test_set
 
 
-def plot_best_DNN(best_model):
+def plot_best_DNN(best_model, metric):
     """Plots the validation curve of the model using its historial results"""
-    plt.plot(best_model[1])
-    plt.plot(best_model[2])
-    plt.title("Model Accuracy")
-    plt.ylabel("Accuracy")
+    plt.plot(np.concatenate(best_model[1][metric]))
+    plt.plot(np.concatenate(best_model[1]["val_" + metric]))
+    plt.title("Model " + metric)
+    plt.ylabel(metric)
     plt.xlabel("Iteration (epoch)")
     plt.legend(["Trainning", "Test"], loc="lower right")
     plt.show()
@@ -172,5 +194,4 @@ t = t["labels"].values
 n, m = X.shape
 n_classes = len(np.unique(t))
 
-best = get_best_DNN(X, t)
-plot_best_DNN(best)"""
+best = optimize_DNN(X, t, epochs=5, kfolds=2, trials=1)"""
