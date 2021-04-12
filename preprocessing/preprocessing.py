@@ -80,10 +80,16 @@ def eliminate_spurious_data(data: pd.DataFrame, sort_value: str) -> pd.DataFrame
     return data, data_spurious
 
 
-def non_numerical_recoding(data: pd.DataFrame, non_numerical: list) -> pd.DataFrame:
+def non_numerical_recoding(data: pd.DataFrame, non_numerical: str) -> pd.DataFrame:
     """Map all the non numerical data to a categorical number."""
-    for label in non_numerical:
-        data[label] = data[label].map(pd.Series(data[label].unique()))
+    # Looking for different values
+    diff_values = data[non_numerical].unique()
+    # Store them in a dictionary
+    dict_states = dict()
+    for i in range(len(diff_values)):
+        dict_states[diff_values[i]] = i
+    # Mapping all the state codes to a categorical number
+    data[non_numerical] = data[non_numerical].map(dict_states)
 
     return data
 

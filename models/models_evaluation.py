@@ -1,5 +1,5 @@
-import hyperparametersTunning as hpTune
-import hyperparametersDNN as hpDNN
+from models import hyperparametersTunning as hpTune
+from models import hyperparametersDNN as hpDNN
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-import customized_metrics as cm
+from models import customized_metrics as cm
 from tensorflow.math import confusion_matrix
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
@@ -147,6 +147,7 @@ def analize_performance_DNN(
     best_DNN,
 ):
     X_test, t_test = best_DNN[1]
+    n_classes = len(np.unique(t_test))
     t_test_bin = to_categorical(t_test, num_classes=n_classes)
     results = pd.DataFrame(columns=best_DNN[0][0].metrics_names)
     results.loc["DNN_test"] = best_DNN[0][0].evaluate(
@@ -253,7 +254,7 @@ def analize_performance_models(best_models, X, t):
         print(classification_report(t_test, y_pred[i]))
         plt.show()
 
-
+"""
 # Example of code
 X = pd.read_csv("test/X.csv")
 X = X.drop(["Unnamed: 0"], axis=1).values
@@ -270,3 +271,4 @@ plt.show()
 print(r)
 print(m)
 # analize_performance_models(a, X, t)
+"""

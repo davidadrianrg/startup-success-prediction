@@ -7,7 +7,7 @@ import pandas as pd
 from test import old_preprocessing as oldpr
 from postprocessing.report import Report
 from preprocessing import preprocessing as prp
-from models import hyperparametersTunning as hpt, hyperparametersDNN as hpdnn
+from models import hyperparametersTunning as hpTune, hyperparametersDNN as hpDNN, models_evaluation as mdleval
 
 
 def make_report_test():
@@ -68,7 +68,7 @@ def make_preprocessing(filepath: str) -> pd.DataFrame:
     data, data_spurious = prp.eliminate_spurious_data(data, "age")
 
     # Recode non numerical columns to numerical ones
-    non_numerical = ["state_code"]
+    non_numerical = "state_code"
     data = prp.non_numerical_recoding(data, non_numerical)
 
     # Normalize quantitative data
@@ -115,23 +115,36 @@ def make_preprocessing(filepath: str) -> pd.DataFrame:
 
     return X, t
 
-def train_models(X: pd.DataFrame, t: pd.DataFrame):
+def train_models(X: np.ndarray, t: np.ndarray):
     """Train different models using the dataset and its labels.
 
     :param X: Input values of the dataset
-    :type X: pd.DataFrame
+    :type X: numpy.ndarray
     :param t: Label values for the exit of the dataset
-    :type t: pd.DataFrame
+    :type t: numpy.ndarray
     """
-    models = hpt.select_models()
+    # Wrapper function of optimize_models and optimize_DNN functions in hyperparameters modules
+    # Return a tuple with a dict with the best models validated and the train size and the best DNN model
+    # Using the hyperperameters ranges given in the arguments
+    best_models, best_DNN = mdleval.get_best_models(X, t)
+
+    # Return a dataframe with validation results of the models in visutalization mode.
+    results = mdleval.get_results(best_models, best_DNN)
+
+    # Study de best models comparing the significative differences takin into account validation results
+    mdleval.compare_models(results)
+    
+    return results
+    
+    #models = hpTune.select_models()
     # Get best models with optimized hyperparameters
-    best_models = hpt.optimizing_models(models, X, t)
+    #best_models = hpTune.optimizing_models(models, X, t)
     # Plot the results
-    hpt.plot_best_model(best_models)
+    #hpTune.plot_best_model(best_models)
     # Get the best DNN model optimizing hyperparameters
-    best_dnn = hpdnn.get_best_DNN(X, t)
+    #best_dnn, _ = hpDNN.optimize_DNN(X, t)
     # Plot the results
-    hpdnn.plot_best_DNN(best_dnn)
+    #hpDNN.plot_best_DNN(best_dnn,"accuracy")
     
 
 def make_report():
@@ -145,7 +158,9 @@ if __name__ == "__main__":
     X, t = make_preprocessing("data/startup_data.csv")
 
     # Training different models using the previous dataset
-    train_models(X, t)
+    results = train_models(X.values, t.values)
+
+    #TODO Implement print_dataframe in Report class to print results from the training
 
     # Generating the report with the results of the training
     make_report()
