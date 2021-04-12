@@ -255,9 +255,9 @@ def analize_performance_models(best_models, X, t):
 
 
 # Example of code
-X = pd.read_csv("X.csv")
+X = pd.read_csv("test/X.csv")
 X = X.drop(["Unnamed: 0"], axis=1).values
-t = pd.read_csv("t.csv")
+t = pd.read_csv("test/t.csv")
 t = t["labels"].values
 n, m = X.shape
 n_classes = len(np.unique(t))
