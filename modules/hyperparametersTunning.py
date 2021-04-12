@@ -16,6 +16,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, cross_validate
+from sklearn.metrics import make_scorer, recall_score
 
 
 def warn(*args, **kwargs):
@@ -33,6 +34,8 @@ def select_models(LR=True, LDA=True, KNN=True, SVC=True):
         models.append("KNN")
     if SVC:
         models.append("SVC")
+    elif models is []:
+        models.append("LR")
     return models
 
 
@@ -86,12 +89,14 @@ def create_random_SVC(
     gamma=["scale", "auto"],
     C=[1e-5, 10],
     decision_function_shape=["ovo", "ovr"],
+    probability=True,
 ):
     model = SVC(
         kernel=random.choice(kernel),
         gamma=random.choice(gamma),
         C=round(loguniform.rvs(C[0], C[1]), int(abs(math.log(C[0], 10)))),
         decision_function_shape=random.choice(decision_function_shape),
+        probability=True,
     )
     return model
 
@@ -117,9 +122,16 @@ def optimizing_models(
     models,
     X,
     t,
-    test_size=0.15,
-    scoring={"accuracy": "accuracy"},
-    cv=20,
+    train_size=0.85,
+    scoring={
+        "accuracy": "accuracy",
+        "recall": "recall",
+        "specificity": make_scorer(recall_score, pos_label=0),
+        "precision": "precision",
+        "f1": "f1",
+        "roc_auc": "roc_auc",
+    },
+    cv=10,
     trials=25,
 ):
 
@@ -129,7 +141,7 @@ def optimizing_models(
     warnings.warn = warn
     best_models = dict()
     X_train, X_test, t_train, t_test = train_test_split(
-        X, t, test_size=test_size
+        X, t, train_size=train_size
     )
     for tag in models:
         last_accuracy = 0
@@ -147,27 +159,23 @@ def optimizing_models(
             )
             mean_accuracy = np.mean(scores["test_accuracy"])
             if mean_accuracy > last_accuracy:
-                best_models[tag] = (
-                    scores["train_accuracy"],
-                    scores["test_accuracy"],
-                    macro_model,
-                )
+                best_models[tag] = (scores, macro_model)
                 last_accuracy = mean_accuracy
                 print("\nBest accuracy so far: ", last_accuracy)
             print(".", end="")
         print(
             "\nScore:",
-            round(np.mean(best_models[tag][1]), 4),
+            round(np.mean(last_accuracy), 4),
             "-",
-            best_models[tag][2].steps[1][1],
+            macro_model.steps[1][1],
         )
     return best_models
 
 
 def plot_best_model(best_models, tag="LR"):
     """Plots the validation curve of the model using its historial results"""
-    plt.plot(best_models[tag][0])
-    plt.plot(best_models[tag][1])
+    plt.plot(best_models[tag][0]["train_accuracy"])
+    plt.plot(best_models[tag][0]["test_accuracy"])
     plt.title("Model Accuracy")
     plt.ylabel("Accuracy")
     plt.xlabel("Iteration (cv)")
