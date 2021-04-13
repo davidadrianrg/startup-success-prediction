@@ -7,7 +7,7 @@ import pandas as pd
 from test import old_preprocessing as oldpr
 from postprocessing.report import Report
 from preprocessing import preprocessing as prp
-from models import hyperparametersTunning as hpTune, hyperparametersDNN as hpDNN, models_evaluation as mdleval
+from models import models_evaluation as mdleval
 
 
 def make_report_test():
@@ -147,8 +147,10 @@ def train_models(X: np.ndarray, t: np.ndarray):
     #hpDNN.plot_best_DNN(best_dnn,"accuracy")
     
 
-def make_report():
+def make_report(X):
     """Generate a report taking into account the given data."""
+    with Report(generate_pdf=True) as report:
+        report.print_dataframe(X,8)
     
 
 
@@ -160,7 +162,5 @@ if __name__ == "__main__":
     # Training different models using the previous dataset
     results = train_models(X.values, t.values)
 
-    #TODO Implement print_dataframe in Report class to print results from the training
-
     # Generating the report with the results of the training
-    make_report()
+    make_report(X)

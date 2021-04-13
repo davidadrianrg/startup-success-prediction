@@ -23,7 +23,7 @@ pre:not(.hljs) {
 }
 
 blockquote {
-    margin: 0 7px 0 5px;
+    margin: 0 5px 0 3px;
 	padding: 0 16px 0 10px;
 	border-left-width: 5px;
 	border-left-style: solid;
@@ -64,6 +64,8 @@ h1, h2, h3 {
 
 table {
 	border-collapse: collapse;
+	table-layout: fixed;
+	width: 100%;
 }
 
 table > thead > tr > th {
@@ -76,6 +78,9 @@ table > thead > tr > td,
 table > tbody > tr > th,
 table > tbody > tr > td {
 	padding: 5px 10px;
+	size: 0.5px;
+	border: 1px solid #dee2e6;
+	font-size:9px;
 }
 
 /* for inline code */

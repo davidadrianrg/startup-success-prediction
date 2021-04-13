@@ -3,6 +3,7 @@
 # Importing required modules
 import numpy as np
 import pandas as pd
+import copy
 import matplotlib.pyplot as plt
 import seaborn as sns
 from os import path, mkdir
@@ -66,18 +67,18 @@ class Report:
             )
 
     @staticmethod
-    def parse_image(img_path: str, title: str = ""):
+    def parse_image(img_path: str, title: str = "") -> str:
         """Parse image to Markdown syntax."""
         return f"![{title}]({img_path})\n"
 
     @staticmethod
-    def parse_title(title: str, h: int = 1):
+    def parse_title(title: str, h: int = 1) -> str:
         """Parse title to Markdown syntax."""
         h_title = "#" * h
         return h_title + " " + title + "\n"
 
     @staticmethod
-    def parse_list(listmd: list, unordered: str = ""):
+    def parse_list(listmd: list, unordered: str = "") -> str:
         """Parse list to Markdown syntax."""
         output = ""
         if unordered:
@@ -90,14 +91,27 @@ class Report:
         return output
 
     @staticmethod
-    def parse_code(codeblock: str, language: str = "python"):
+    def parse_code(codeblock: str, language: str = "python") -> str:
         """Parse code to Markdown syntax."""
         return f"```{language}\n{codeblock}\n```"
 
     @staticmethod
-    def parse_noformat(paragraph: str):
+    def parse_noformat(paragraph: str) -> str:
         """Parse paragraph to avoid Markdown syntax."""
         return f"\n```no-format\n{paragraph}\n```\n"
+    
+    @staticmethod
+    def parse_dataframe(data: pd.DataFrame, rows: int = 5) -> str:
+        """Parse dataframe to a markdown table showing the rows given by rows argument.
+
+        :param data: Pandas dataframe to be parsed to markdown table
+        :type data: pd.DataFrame
+        :param rows: Number of rows to be parsed, defaults to 5
+        :type rows: int, optional
+        :return: Markdown table in string format
+        :rtype: str
+        """
+        return f"{data.head(rows).to_markdown()}\n\n"
 
     @staticmethod
     def parse_pdf(mdstring: str):
@@ -342,6 +356,32 @@ class Report:
 
         # Saving image to file and report
         self.save_image(fig, filename, img_title, **kwargs)
+    
+    def print_dataframe(self, data: pd.DataFrame, rows: int = 5):
+        """Print the dataframe with the given rows to the report file.
+        
+        If the dataframe have more than 5 columns, will be divided to print in the report.
+
+        :param data: Pandas dataframe to be printed
+        :type data: pd.DataFrame
+        :param rows: Number of rows of the dataframe to be printed, defaults to 5
+        :type rows: int, optional
+        """
+        if (data.shape[1]) > 5:
+            colum_start = 0
+            colum_end = 5
+            ntables = data.shape[1] // 5
+            for i in range(0, ntables):
+                data_split = data.iloc[:,  colum_start : colum_end]
+                self.report_file.write(self.parse_dataframe(data_split, rows))
+                colum_start = copy.copy(colum_end)
+                colum_end += 5
+            colums_left = data.shape[1] - ntables*5
+            colum_end = colum_end + colums_left - 5
+            data_split = data.iloc[:, colum_start : colum_end]
+            self.report_file.write(self.parse_dataframe(data_split, rows))
+        else:
+            self.report_file.write(self.parse_dataframe(data, rows))
 
     def save_image(self, figure: plt.Figure, filename: str, img_title: str, **kwargs):
         """Image saving method to file and report."""
