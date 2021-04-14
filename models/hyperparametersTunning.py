@@ -61,9 +61,7 @@ def create_random_LDA(
     model = LinearDiscriminantAnalysis(
         solver=random.choice(solver),
         shrinkage=random.choice(shrinkage),
-        tol=round(
-            loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))
-        ),
+        tol=round(loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))),
     )
     return model
 
@@ -143,9 +141,7 @@ def optimizing_models(
 
     warnings.warn = warn
     best_models = dict()
-    X_train, X_test, t_train, t_test = train_test_split(
-        X, t, train_size=train_size
-    )
+    X_train, X_test, t_train, t_test = train_test_split(X, t, train_size=train_size)
     for tag in models:
         last_accuracy = 0
         print(f"\n***Optimizing {tag} hyperparameters***")
