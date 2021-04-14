@@ -93,12 +93,8 @@ def get_results(best_models, best_DNN):
         if "test_" + metric in best_models[tags[0]][0]:
 
             for tag in tags:
-                data[tag + "_train_" + metric] = best_models[tag][0][
-                    "train_" + metric
-                ]
-                data[tag + "_val_" + metric] = best_models[tag][0][
-                    "test_" + metric
-                ]
+                data[tag + "_train_" + metric] = best_models[tag][0]["train_" + metric]
+                data[tag + "_val_" + metric] = best_models[tag][0]["test_" + metric]
 
             data["DNN_train_" + metric] = DNN_means[metric]
             data["DNN_val_" + metric] = DNN_means["val_" + metric]
@@ -240,9 +236,7 @@ def analize_performance_models(best_models, X, t):
     y_pred = dict()
     y_score = dict()
 
-    X_train, X_test, t_train, t_test = train_test_split(
-        X, t, train_size=train_size
-    )
+    X_train, X_test, t_train, t_test = train_test_split(X, t, train_size=train_size)
     for i in best_models:
         best_models[i][1].fit(X_train, t_train)
         y_pred[i] = best_models[i][1].predict(X_test)
@@ -253,6 +247,7 @@ def analize_performance_models(best_models, X, t):
         print(i + " - evaluation report per class")
         print(classification_report(t_test, y_pred[i]))
         plt.show()
+
 
 """
 # Example of code

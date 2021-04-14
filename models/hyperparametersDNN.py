@@ -50,9 +50,7 @@ def create_random_network(
     model.add(keras.layers.Dense(n_classes, activation="softmax"))
     # Choosing a learning rate from a logarithmic uniform distrbution
     optimizer = optimizer(
-        learning_rate=round(
-            loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10)))
-        )
+        learning_rate=round(loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10))))
     )
     # Define some characteristics for the training process
     model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
