@@ -23,13 +23,13 @@ def make_report_test():
         scores_list = np.load("./test/hptest.npz")
         labels_list = ["modelLR", "modelLDA", "modelKNN"]
         report.print_title("Hypotheses Contrast for models", 3)
-        report.print_hpcontrast(scores_list['arr_0'], scores_list['arr_1'], scores_list['arr_2'], labels=labels_list)
         cl_list = np.load("./test/clreport.npz")
         report.print_title("Classification Report for the model", 3)
         report.print_clreport(cl_list["arr_0"], cl_list["arr_1"])
         roc_list = np.load("./test/roc_test.npz")
         report.print_title("ROC Curve representation for the labels", 3)
         report.print_roc_curve(roc_list["arr_0"], roc_list["arr_1"])
+
 
 def make_preprocessing(filepath: str) -> pd.DataFrame:
     """Clean and prepare the given dataframe to train ML models."""
@@ -39,14 +39,14 @@ def make_preprocessing(filepath: str) -> pd.DataFrame:
     # Clean the dataset of lost values
     drop_duplicates = ["name"]
     to_drop = [
-                "Unnamed: 0",
-                "Unnamed: 6",
-                "latitude",
-                "longitude",
-                "zip_code",
-                "object_id",
-                "status",
-            ]
+        "Unnamed: 0",
+        "Unnamed: 6",
+        "latitude",
+        "longitude",
+        "zip_code",
+        "object_id",
+        "status",
+    ]
     data, data_missing = prp.drop_values(data, drop_duplicates, to_drop)
 
     # Fill empty values with zeros
@@ -76,44 +76,60 @@ def make_preprocessing(filepath: str) -> pd.DataFrame:
 
     # Get X and t from the dataset using the column tags
     x_tags = [
-                "state_code",
-                "age_last_funding_year",
-                "age_first_milestone_year",
-                "age_last_milestone_year",
-                "funding_rounds",
-                "milestones",
-                "is_CA",
-                "is_NY",
-                "is_MA",
-                "is_TX",
-                "is_otherstate",
-                "is_software",
-                "is_web",
-                "is_mobile",
-                "is_enterprise",
-                "is_advertising",
-                "is_gamesvideo",
-                "is_ecommerce",
-                "is_biotech",
-                "is_consulting",
-                "is_othercategory",
-                "has_VC",
-                "has_angel",
-                "has_roundA",
-                "has_roundB",
-                "has_roundC",
-                "has_roundD",
-                "avg_participants",
-                "is_top500",
-                "age",
-                "norm_funding_total_usd",
-                "norm_age_first_funding_year",
-                "norm_relationships",
-            ]
+        "state_code",
+        "age_last_funding_year",
+        "age_first_milestone_year",
+        "age_last_milestone_year",
+        "funding_rounds",
+        "milestones",
+        "is_CA",
+        "is_NY",
+        "is_MA",
+        "is_TX",
+        "is_otherstate",
+        "is_software",
+        "is_web",
+        "is_mobile",
+        "is_enterprise",
+        "is_advertising",
+        "is_gamesvideo",
+        "is_ecommerce",
+        "is_biotech",
+        "is_consulting",
+        "is_othercategory",
+        "has_VC",
+        "has_angel",
+        "has_roundA",
+        "has_roundB",
+        "has_roundC",
+        "has_roundD",
+        "avg_participants",
+        "is_top500",
+        "age",
+        "norm_funding_total_usd",
+        "norm_age_first_funding_year",
+        "norm_relationships",
+    ]
     label_tag = "labels"
-    X, t = prp.split_X_t(data, x_tags, label_tag )
+    X, t = prp.split_X_t(data, x_tags, label_tag)
 
-    return X, t
+    # Make a dictionary with the dataframes to be returned
+
+    dataframes_dict = {
+        "X": X,
+        "t": t.to_frame(),
+        "Data Missing": data_missing,
+        "Data Spurious": data_spurious,
+        "Data Skewness": data_skewness,
+        "Data": data
+    }
+
+    # Make a features list to be returned
+
+    features_list = [features, norm_features]
+
+    return dataframes_dict, features_list
+
 
 def train_models(X: np.ndarray, t: np.ndarray):
     """Train different models using the dataset and its labels.
@@ -133,34 +149,77 @@ def train_models(X: np.ndarray, t: np.ndarray):
 
     # Study de best models comparing the significative differences takin into account validation results
     mdleval.compare_models(results)
-    
-    return results
-    
-    #models = hpTune.select_models()
-    # Get best models with optimized hyperparameters
-    #best_models = hpTune.optimizing_models(models, X, t)
-    # Plot the results
-    #hpTune.plot_best_model(best_models)
-    # Get the best DNN model optimizing hyperparameters
-    #best_dnn, _ = hpDNN.optimize_DNN(X, t)
-    # Plot the results
-    #hpDNN.plot_best_DNN(best_dnn,"accuracy")
-    
 
-def make_report(X):
+    return results
+
+
+def make_report(df_dict: dict, features_list: list, results: pd.DataFrame):
     """Generate a report taking into account the given data."""
+    # Processing the data to be passed to the Report class in the right format
+    results_tags = []
+    for i in results.columns:
+        if len(i.split("_val_accuracy")) > 1:
+            results_tags.append(i.split("_val_accuracy")[0])
+
+    results_data = []
+    results_labels = []
+    for tag in results_tags:
+        results_data.append(results[tag + "_val_accuracy"])
+        results_labels.append(tag)
+
     with Report(generate_pdf=True) as report:
-        report.print_dataframe(X,8)
-    
+        # Generating the header
+        report.print_title("Startup Success Prediction Model")
+        report.print_title("David Adrián Rodríguez García & Víctor Caínzos López", 2)
+        report.print_line()
+
+        # Generating preprocessing report chapter
+        report.print_title("Preprocesado: Preparación de los datos", 3)
+        report.print(
+            """En primer lugar se realizará un análisis del dataset **startup_data.csv** 
+            para el cual se realizará la limpieza de los datos espurios o nulos y se procederá 
+            al filtrado de las columnas representativas y la recodificación de variables cualitativas a cuantitativas."""
+        )
+
+        report.print_title("Data Missing dataframe: Contiene los datos eliminados del dataset original.", 4)
+        report.print_line()
+        report.print_dataframe(df_dict["Data Missing"])
+
+        report.print_title("Data Spurious dataframe: Contiene los datos sin sentido del dataset original.", 4)
+        report.print_line()
+        report.print_dataframe(df_dict["Data Spurious"])
+
+        report.print_title("Data Skewness dataframe: Contiene los datos con alta dispersión del dataset original.", 4)
+        report.print_line()
+        report.print_dataframe(df_dict["Data Skewness"])
+
+        report.print_title("Boxplot Feature Skewness > 2: Muestra la dispersión de los datos para las características con asimetría mayor que 2.", 4)
+        report.print_line()
+        report.print_boxplot(df_dict["Data"], features_list[0].tolist(), filename="boxplot_fskewness.png", img_title="Boxplot Feature Skewness")
+
+        report.print_title("Boxplot Norm Features: Muestra la dispersión de los datos para las características normalizadas.", 4)
+        report.print_line()
+        report.print_boxplot(df_dict["Data"], features_list[1], filename="boxplot_normalized.png", img_title="Boxplot Normalized Feature")
+
+        report.print_title("X dataframe: Contiene la matriz de características.", 4)
+        report.print_line()
+        report.print_dataframe(df_dict["X"])
+
+        report.print_title("t dataframe: Contiene el vector de etiquetas.", 4)
+        report.print_line()
+        report.print_dataframe(df_dict["t"])
+
+        #TODO Generating training report chapter
+
 
 
 if __name__ == "__main__":
-    
+
     # Loading and preprocessing the startup dataframe
-    X, t = make_preprocessing("data/startup_data.csv")
+    df_dict, features_list = make_preprocessing("data/startup_data.csv")
 
     # Training different models using the previous dataset
-    results = train_models(X.values, t.values)
+    results = train_models(df_dict.get("X").values, df_dict.get("t").values)
 
     # Generating the report with the results of the training
-    make_report(X)
+    make_report(df_dict, features_list, results)

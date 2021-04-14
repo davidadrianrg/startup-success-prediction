@@ -99,7 +99,7 @@ class Report:
     def parse_noformat(paragraph: str) -> str:
         """Parse paragraph to avoid Markdown syntax."""
         return f"\n```no-format\n{paragraph}\n```\n"
-    
+
     @staticmethod
     def parse_dataframe(data: pd.DataFrame, rows: int = 5) -> str:
         """Parse dataframe to a markdown table showing the rows given by rows argument.
@@ -264,27 +264,25 @@ class Report:
             title + ":\n\n" + str(classification_report(t_test, y_pred))
         )
 
-    def print_hpcontrast(self, *args: list, labels: list, alpha: float = 0.05):
+    def print_hpcontrast(self, data: list, labels: list, alpha: float = 0.05):
         """
         Contrast the hypoteses of the scores given in the list and print the results in the report.
 
         Using Kurskal-Wallis and Tuckeyhsd tests.
         """
-        _, pVal = stats.kruskal(*args)
+        _, pVal = stats.kruskal(*data)
         str_toprint = f"p-valor KrusW:{pVal}\n"
         if pVal <= alpha:
             str_toprint += "Hypotheses are being rejected: the models are different\n"
-            stacked_data = np.vstack(args).ravel()
-            cv_len = args[0].size
-            labels_model = []
-            for i in range(0, len(args)):
-                labels_model.append(np.repeat(labels[i], cv_len))
-            stacked_model = np.vstack(labels_model).ravel()
+            stacked_data = np.vstack(data).ravel()
+            cv = len(data[0])
+            model_rep = []
+            for i in labels:
+                model_rep.append(np.repeat("model" + i, cv))
+            stacked_model = np.vstack(model_rep).ravel()
             multi_comp = MultiComparison(stacked_data, stacked_model)
-            comp = multi_comp.allpairtest(stats.ttest_rel, method="Holm")
-            str_toprint += str(comp[0]) + "\n"
-            str_toprint += str(multi_comp.tukeyhsd(alpha=alpha))
-            self.print_noformat(str_toprint)
+            comp = multi_comp.tukeyhsd(alpha=alpha)
+            str_toprint += str(comp)
         else:
             self.print_noformat(
                 str_toprint + "Hypotheses are being accepted: the models are equal"
@@ -356,10 +354,10 @@ class Report:
 
         # Saving image to file and report
         self.save_image(fig, filename, img_title, **kwargs)
-    
+
     def print_dataframe(self, data: pd.DataFrame, rows: int = 5):
         """Print the dataframe with the given rows to the report file.
-        
+
         If the dataframe have more than 5 columns, will be divided to print in the report.
 
         :param data: Pandas dataframe to be printed
@@ -372,13 +370,13 @@ class Report:
             colum_end = 5
             ntables = data.shape[1] // 5
             for i in range(0, ntables):
-                data_split = data.iloc[:,  colum_start : colum_end]
+                data_split = data.iloc[:, colum_start:colum_end]
                 self.report_file.write(self.parse_dataframe(data_split, rows))
                 colum_start = copy.copy(colum_end)
                 colum_end += 5
-            colums_left = data.shape[1] - ntables*5
+            colums_left = data.shape[1] - ntables * 5
             colum_end = colum_end + colums_left - 5
-            data_split = data.iloc[:, colum_start : colum_end]
+            data_split = data.iloc[:, colum_start:colum_end]
             self.report_file.write(self.parse_dataframe(data_split, rows))
         else:
             self.report_file.write(self.parse_dataframe(data, rows))
