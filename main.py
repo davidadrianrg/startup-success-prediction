@@ -150,10 +150,10 @@ def train_models(X: np.ndarray, t: np.ndarray):
     # Study de best models comparing the significative differences takin into account validation results
     mdleval.compare_models(results)
 
-    return results
+    return results, best_models, best_DNN
 
 
-def make_report(df_dict: dict, features_list: list, results: pd.DataFrame):
+def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_models: tuple, best_DNN: tuple):
     """Generate a report taking into account the given data."""
     # Processing the data to be passed to the Report class in the right format
     results_tags = []
@@ -161,10 +161,10 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame):
         if len(i.split("_val_accuracy")) > 1:
             results_tags.append(i.split("_val_accuracy")[0])
 
-    results_data = []
+    results_data = {}
     results_labels = []
     for tag in results_tags:
-        results_data.append(results[tag + "_val_accuracy"])
+        results_data.update({tag: results[tag + "_val_accuracy"]})
         results_labels.append(tag)
 
     with Report(generate_pdf=True) as report:
@@ -209,7 +209,41 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame):
         report.print_line()
         report.print_dataframe(df_dict["t"])
 
-        #TODO Generating training report chapter
+        # Generating training report chapter
+        report.print_title("Entrenamiento: Comparativa de modelos de aprendizaje automático", 3)
+        report.print(
+            """Se procederá a comparar los resultados obtenidos de diferentes modelos de aprendizaje automático
+            variando tanto el tipo de modelo como los hiperparámetros de los que depende con el objetivo
+            de obtener el mejor modelo que prediga el éxito o fracaso de las diferentes startups"""
+        )
+
+        report.print_title("Results dataframe: Muestra los resultados de los mejores modelos obtenidos", 4)
+        report.print_line()
+        report.print_dataframe(results)
+
+        report.print_title("Boxplot models: Muestra los valores de exactitud de los diferentes modelos", 4)
+        report.print_line()
+        report.print_boxplot(pd.DataFrame(results_data), results_labels,filename="boxplot_models_accuracy.png" , img_title="Boxplot Models Accuracy",figsize= (10,7), same_scale=True)
+
+        report.print_title("Contraste de hipótesis: Comparación de modelos mediante el test de Kruskal-Wallis", 4)
+        report.print_line()
+        report.print_hpcontrast(list(results_data.values()), results_labels)
+
+        
+        # To analize the models is needed to fit them using analize_performance_models function from models_evaluation module
+        #TODO Debug the errors in the report methodes
+        best_models, X_test,t_test, y_pred, y_score = mdleval.analize_performance_models(best_models, df_dict.get("X"), df_dict.get("t"))
+        report.print_title("Matrices de confusión: Compara los valores reales con los valores predichos para cada modelo", 4)
+        report.print_line()
+        for model in best_models:
+            report.print_confusion_matrix(best_models[model][1], X_test, t_test, filename="confusion_matrix_" + model + ".png", img_title="Matriz de confusión " + model, xlabel="Clase Predicha", ylabel="Clase Real")
+            report.print_roc_curve(t_test, y_score[model], filename="roc_curve_" + model + ".png", img_title="Curva ROC de " + model)
+            report.print_clreport(t_test,y_pred[model], title="Classification report for model " + model)
+        
+
+        #TODO confusion_matrix_DNN(DataFrame)
+        #TODO plot_best_models(figure)
+        #TODO plot_best_DNN(figure)
 
 
 
@@ -219,7 +253,7 @@ if __name__ == "__main__":
     df_dict, features_list = make_preprocessing("data/startup_data.csv")
 
     # Training different models using the previous dataset
-    results = train_models(df_dict.get("X").values, df_dict.get("t").values)
+    results, best_models, best_DNN = train_models(df_dict.get("X").values, df_dict.get("t").values)
 
     # Generating the report with the results of the training
-    make_report(df_dict, features_list, results)
+    make_report(df_dict, features_list, results, best_models, best_DNN)

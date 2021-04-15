@@ -10,6 +10,7 @@ from os import path, mkdir
 from md2pdf.core import md2pdf
 import scipy.stats as stats
 from statsmodels.stats.multicomp import MultiComparison
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.model_selection import validation_curve
 from sklearn.base import BaseEstimator
@@ -149,14 +150,20 @@ class Report:
         figsize: tuple = (15, 7),
         color: str = "green",
         orient: str = "v",
+        same_scale : bool = False,
         **kwargs,
     ):
         """Print to file the boxplot of the given data."""
         fig = plt.figure(figsize=figsize)
-        for label in labels:
-            fig.add_subplot(1, len(labels), labels.index(label) + 1)
-            sns.boxplot(y=data[label], color=color, orient=orient)
-            fig.tight_layout()
+        if same_scale:
+            ax = plt.axes()
+            ax.set_title(img_title)
+            sns.boxplot(data = data)
+        else:
+            for label in labels:
+                fig.add_subplot(1, len(labels), labels.index(label) + 1)
+                sns.boxplot(y=data[label], color=color, orient=orient)
+                fig.tight_layout()
 
         # Saving image to file and report
         self.save_image(fig, filename, img_title, **kwargs)
@@ -284,9 +291,8 @@ class Report:
             comp = multi_comp.tukeyhsd(alpha=alpha)
             str_toprint += str(comp)
         else:
-            self.print_noformat(
-                str_toprint + "Hypotheses are being accepted: the models are equal"
-            )
+            str_toprint = str_toprint + "Hypotheses are being accepted: the models are equal"
+        self.print_noformat(str_toprint)
 
     def print_validation_curve(
         self,
