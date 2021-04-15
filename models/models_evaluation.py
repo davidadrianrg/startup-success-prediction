@@ -180,6 +180,7 @@ def calculate_cmatrix_models(model, tag, X_test, t_test):
     disp.figure_.set_dpi(100)
     plt.xlabel("Clase predicha")
     plt.ylabel("Clase real")
+    return disp
 
 
 def calculate_roc_curve(t, y, tag):
@@ -235,18 +236,16 @@ def analize_performance_models(best_models, X, t):
     best_models = best_models[0]
     y_pred = dict()
     y_score = dict()
+    cmx_list = []
 
     X_train, X_test, t_train, t_test = train_test_split(X, t, train_size=train_size)
-    for i in best_models:
-        best_models[i][1].fit(X_train, t_train)
-        y_pred[i] = best_models[i][1].predict(X_test)
-        y_score[i] = best_models[i][1].predict_proba(X_test)
+    for model in best_models:
+        best_models[model][1].fit(X_train, t_train)
+        y_pred[model] = best_models[model][1].predict(X_test)
+        y_score[model] = best_models[model][1].predict_proba(X_test)
 
-        calculate_cmatrix_models(best_models[i][1], i, X_test, t_test)
-        calculate_roc_curve(t_test, y_score[i], i)
-        print(i + " - evaluation report per class")
-        print(classification_report(t_test, y_pred[i]))
-        plt.show()
+    return best_models, X_test,t_test, y_pred, y_score
+
 
 
 """
