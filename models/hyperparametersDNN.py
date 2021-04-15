@@ -50,7 +50,9 @@ def create_random_network(
     model.add(keras.layers.Dense(n_classes, activation="softmax"))
     # Choosing a learning rate from a logarithmic uniform distrbution
     optimizer = optimizer(
-        learning_rate=round(loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10))))
+        learning_rate=round(
+            loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10)))
+        )
     )
     # Define some characteristics for the training process
     model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
@@ -113,9 +115,6 @@ def optimize_DNN(
     n_classes = len(np.unique(t))
     cv = KFold(kfolds)
     last_mean = 0
-    last_trained = 0
-    n, m = X.shape
-    n_classes = len(np.unique(t))
 
     # Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it
     X_train_set, X_test, t_train_set, t_test = train_test_split(
