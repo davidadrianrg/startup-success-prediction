@@ -35,6 +35,7 @@ pip install seaborn
 pip install scipy
 ```
 
+- scikit-learn
 
 There are different ways to install ```scikit-learn```,  before moving to the installation, it requires the following:
 - Python version 3.5 or higher
@@ -48,6 +49,8 @@ And then:
 pip install -U scikit-learn
 ``` 
 For more information check [scikit-learn](https://scikit-learn.org/stable/install.html).
+
+- tensorflow
   
 Now it is also necessary the ```TensorFlow``` library:
  
@@ -57,6 +60,8 @@ pip install tensorflow
 
 For more information check [tensorflow](https://www.tensorflow.org/install?hl=es-419).
 
+- keras
+
 And finally, ```keras```:
 ```bash
 pip install keras
@@ -64,13 +69,21 @@ pip install keras
 For more information check [keras](https://www.tutorialspoint.com/keras/keras_installation.htm).
 
 ### Recommended
-In order to take advantege of total functionalities of the program generation files:
+In order to take advantage of total functionalities of the program generation files:
 
 - md2pdf Client
 ```bash
 pip install md2pdf-client
 ```
 More information here [md2pdf Client](https://pypi.org/project/md2pdf-client/).
+
+### Running
+Having followed the previous installation steps, to run the program it is enough with:
+
+```bash
+python main.py
+```
+
 
 
 
