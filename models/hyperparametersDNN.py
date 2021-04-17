@@ -9,7 +9,7 @@ import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-import customized_metrics as cm
+from models import customized_metrics as cm
 from sklearn.model_selection import train_test_split, KFold
 from tensorflow import keras
 from keras.utils import to_categorical

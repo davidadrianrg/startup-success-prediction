@@ -1,35 +1,11 @@
 """Main file of the program to train a model for startup success prediction."""
 
 # Importing required modules
-
 import numpy as np
 import pandas as pd
-from test import old_preprocessing as oldpr
 from postprocessing.report import Report
 from preprocessing import preprocessing as prp
 from models import models_evaluation as mdleval
-
-
-def make_report_test():
-    """Generate a report taking into account the given data (TEST ONLY)."""
-    with Report(generate_pdf=True) as report:
-        # Testing diferent modules to print the report
-        data, labels, _, _ = oldpr.preprocess()
-        report.print_title("Startup Success Prediction Model")
-        report.print_title("David Adrián Rodríguez García & Víctor Caínzos López", 2)
-        report.print_line()
-        report.print_title("BoxPlot Graph", 3)
-        report.print_boxplot(data, labels)
-        scores_list = np.load("./test/hptest.npz")
-        labels_list = ["modelLR", "modelLDA", "modelKNN"]
-        report.print_title("Hypotheses Contrast for models", 3)
-        cl_list = np.load("./test/clreport.npz")
-        report.print_title("Classification Report for the model", 3)
-        report.print_clreport(cl_list["arr_0"], cl_list["arr_1"])
-        roc_list = np.load("./test/roc_test.npz")
-        report.print_title("ROC Curve representation for the labels", 3)
-        report.print_roc_curve(roc_list["arr_0"], roc_list["arr_1"])
-
 
 def make_preprocessing(filepath: str) -> pd.DataFrame:
     """Clean and prepare the given dataframe to train ML models."""
@@ -140,15 +116,17 @@ def train_models(X: np.ndarray, t: np.ndarray):
     :type t: numpy.ndarray
     """
     # Wrapper function of optimize_models and optimize_DNN functions in hyperparameters modules
+
+    # Ask user for the training trials, epochs and folds
+    trials = int(input("Introduce el número de intentos aleatorios en la generación de los modelos: "))
+    epochs = int(input("Introduce el número de iteraciones máximo: "))
+    cv = int(input("Introduce el número de folds para la validación cruzada: "))
     # Return a tuple with a dict with the best models validated and the train size and the best DNN model
     # Using the hyperperameters ranges given in the arguments
-    best_models, best_DNN = mdleval.get_best_models(X, t)
+    best_models, best_DNN = mdleval.get_best_models(X, t, cv=cv, trials=trials, epochs=epochs)
 
     # Return a dataframe with validation results of the models in visutalization mode.
     results = mdleval.get_results(best_models, best_DNN)
-
-    # Study de best models comparing the significative differences takin into account validation results
-    mdleval.compare_models(results)
 
     return results, best_models, best_DNN
 
@@ -166,6 +144,12 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
     for tag in results_tags:
         results_data.update({tag: results[tag + "_val_accuracy"]})
         results_labels.append(tag)
+    
+    # To analize the models is needed to fit them using analize_performance_models function from models_evaluation module
+    best_models, X_test, t_test, y_pred, y_score = mdleval.analize_performance_models(best_models, df_dict.get("X"), df_dict.get("t"))
+    # Same function calling for the DNN models
+    results_DNN, X_test_dnn, t_test_dnn, y_pred_dnn, y_pred_proba_dnn = mdleval.analize_performance_DNN(best_DNN)
+
 
     with Report(generate_pdf=True) as report:
         # Generating the header
@@ -229,22 +213,42 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         report.print_line()
         report.print_hpcontrast(list(results_data.values()), results_labels)
 
-        
-        # To analize the models is needed to fit them using analize_performance_models function from models_evaluation module
-        #TODO Debug the errors in the report methodes
-        best_models, X_test,t_test, y_pred, y_score = mdleval.analize_performance_models(best_models, df_dict.get("X"), df_dict.get("t"))
         report.print_title("Matrices de confusión: Compara los valores reales con los valores predichos para cada modelo", 4)
         report.print_line()
         for model in best_models:
-            report.print_confusion_matrix(best_models[model][1], X_test, t_test, filename="confusion_matrix_" + model + ".png", img_title="Matriz de confusión " + model, xlabel="Clase Predicha", ylabel="Clase Real")
+            report.print_confusion_matrix(best_models[model][1], X_test.values, t_test.values, filename="confusion_matrix_" + model + ".png", img_title="Matriz de confusión " + model, xlabel="Clase Predicha", ylabel="Clase Real")
+        report.print("\n")
+        report.print_confusion_matrix_DNN(t_test_dnn, y_pred_dnn, xlabel="Clase Predicha", ylabel="Clase Real", title="Matriz de confusión DNN")
+
+        report.print_title("Curva ROC: Compara el ajuste entre la especificidad y la sensibilidad para cada modelo", 4)
+        report.print_line()
+        for model in best_models:
             report.print_roc_curve(t_test, y_score[model], filename="roc_curve_" + model + ".png", img_title="Curva ROC de " + model)
-            report.print_clreport(t_test,y_pred[model], title="Classification report for model " + model)
+        report.print_roc_curve(t_test_dnn,y_pred_proba_dnn, filename="roc_curve_dnn.png", img_title="Curva ROC de DNN")
         
+        report.print_title("Informe de clasificación: Compara los resultados de cada modelo de clasificación", 4)
+        report.print_line()
+        for model in best_models:
+            report.print_clreport(t_test, y_pred[model], title="Classification report for model " + model)
+        report.print_clreport(t_test_dnn, y_pred_dnn, title="Classification report for model DNN")
 
-        #TODO confusion_matrix_DNN(DataFrame)
-        #TODO plot_best_models(figure)
-        #TODO plot_best_DNN(figure)
+        report.print_title("Exactitud media: Compara la exactitud de cada modelo en función de sus hiperparámetros", 4)
+        report.print_line()
+        for model in best_models:
+            report.print_val_curve_model(best_models, model, filename="validation_curve_" + model + ".png", img_title="Curva de validación de " + model)
+        report.print_title("Curva de validación: Compara los resultados del modelo en función de sus hiperparámetros", 4)
+        report.print_line()
+        report.print_val_curve_dnn(best_DNN)
 
+        report.print_title("Hiperparámetros: Muestra el dataframe con los hiperparámetros usados en el entrenamiento", 4)
+        report.print_line()
+        for model in best_models:
+            report.print_title("Hiperparámetros del modelo " + model, 5)
+            report.print_dataframe(mdleval.get_hyperparams(best_models[model][1].steps[1][1], model))
+        report.print_title("Hiperparámetros de la red neuronal", 5)
+        dfparams, dfcomp = mdleval.get_hyperparams_DNN(best_DNN[0][0])
+        report.print_dataframe(dfparams)
+        report.print_dataframe(dfcomp)
 
 
 if __name__ == "__main__":

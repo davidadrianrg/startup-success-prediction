@@ -11,7 +11,7 @@ from md2pdf.core import md2pdf
 import scipy.stats as stats
 from statsmodels.stats.multicomp import MultiComparison
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import label_binarize
+from keras.utils import to_categorical
 from sklearn.model_selection import validation_curve
 from sklearn.base import BaseEstimator
 from sklearn.metrics import (
@@ -19,6 +19,7 @@ from sklearn.metrics import (
     auc,
     plot_confusion_matrix,
     classification_report,
+    confusion_matrix
 )
 
 
@@ -177,18 +178,41 @@ class Report:
         ylabel: str,
         filename: str = "confusion_matrix.png",
         img_title: str = "Confusion Matrix",
-        size: int = 100,
+        size_dpi: int = 100,
         **kwargs,
     ):
         """Print confusion matrix plot of the given model."""
         disp = plot_confusion_matrix(
-            model, X_test, t_test, labels=[xlabel, ylabel]
+            model, X_test, t_test
         )  # Show confusion matrix plot
         disp.figure_.suptitle(img_title)  # Add title to the confusion matrix
-        disp.figure_.set_dpi(size)  # Set figure size
+        disp.figure_.set_dpi(size_dpi)  # Set figure dpi
+        disp.ax_.set_xlabel(xlabel)
+        disp.ax_.set_ylabel(ylabel)
 
         # Saving image to file and report
         self.save_image(disp.figure_, filename, img_title, **kwargs)
+    
+    def print_confusion_matrix_DNN(
+        self,
+        t_test: np.ndarray,
+        y_pred: np.ndarray,
+        xlabel: str,
+        ylabel: str,
+        title: str,
+        **kwargs,
+    ):
+        """Print confusion matrix plot of the given DNN model."""
+        m = confusion_matrix(t_test, y_pred)
+        classes = len(m)
+        columns = []
+        index = []
+        for iclass in range(classes):
+            columns.append(ylabel + " " + str(iclass))
+            index.append(xlabel+ " " + str(iclass))
+        df_matrix = pd.DataFrame(m, index=index, columns=columns)
+        self.print(f"**{title}**\n")
+        self.print_dataframe(df_matrix)
 
     def print_roc_curve(
         self,
@@ -204,12 +228,8 @@ class Report:
     ):
         """Print roc curves for any labels of the given model."""
         # Binarizing classes
-        n_classes = len(
-            np.unique(t_test)
-        )  # Calculate the number of classes in the problem
-        t_test_bin = label_binarize(
-            t_test, classes=np.arange(0, n_classes, 1)
-        )  # Recoding the labels to binary values
+        n_classes = len(np.unique(t_test))  # Calculate the number of classes in the problem
+        t_test_bin = to_categorical(t_test, num_classes=n_classes) # Recoding the labels to binary values
 
         # Ploting the figure with each roc curve per class
         fig = plt.figure(figsize=figsize)
@@ -359,6 +379,30 @@ class Report:
         ax.legend(loc="best", fontsize="x-small")
 
         # Saving image to file and report
+        self.save_image(fig, filename, img_title, **kwargs)
+
+    def print_val_curve_model(self,best_models, tag: str, filename:str = "validation_curve.png", img_title: str = "Validation Curve", **kwargs):
+        """Plot the validation curve of the model using its historial results to the report."""
+        fig, ax = plt.subplots()
+        ax.plot(best_models[tag][0]["train_accuracy"])
+        ax.plot(best_models[tag][0]["test_accuracy"])
+        ax.set_title("Validation curve with " + tag)
+        ax.set_ylabel("Accuracy")
+        ax.set_xlabel("Iteration (cv)")
+        ax.legend(["Trainning", "Test"], loc="lower right")
+
+        self.save_image(fig, filename, img_title, **kwargs)
+    
+    def print_val_curve_dnn(self, best_DNN, metric: str ="accuracy", filename:str = "validation_curve_dnn.png", img_title: str = "Validation Curve", **kwargs):
+        """Plot the validation curve of the model using its historial results to the report."""
+        fig, ax = plt.subplots()
+        ax.plot(np.mean(best_DNN[0][1][metric], axis=0))
+        ax.plot(np.mean(best_DNN[0][1]["val_" + metric], axis=0))
+        ax.set_title("DNN Model " + metric)
+        ax.set_ylabel(metric)
+        ax.set_xlabel("Iteration (epoch)")
+        ax.legend(["Trainning", "Test"], loc="lower right")
+
         self.save_image(fig, filename, img_title, **kwargs)
 
     def print_dataframe(self, data: pd.DataFrame, rows: int = 5):
