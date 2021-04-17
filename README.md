@@ -78,7 +78,12 @@ pip install md2pdf-client
 More information here [md2pdf Client](https://pypi.org/project/md2pdf-client/).
 
 ### Running
-Having followed the previous installation steps, to run the program it is enough with:
+Having followed the previous installation steps, it is time to clone the [github repository](https://github.com/davidadrianrg/startup-success-prediction):
+```bash
+gitclone https://github.com/davidadrianrg/startup-success-prediction
+```
+
+After that, to run the program it is enough with:
 
 ```bash
 python main.py
