@@ -1,5 +1,5 @@
-from models import hyperparametersTunning as hpTune
-from models import hyperparametersDNN as hpDNN
+import hyperparametersTunning as hpTune
+import hyperparametersDNN as hpDNN
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-from models import customized_metrics as cm
+import customized_metrics as cm
 from tensorflow.math import confusion_matrix
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
@@ -93,8 +93,12 @@ def get_results(best_models, best_DNN):
         if "test_" + metric in best_models[tags[0]][0]:
 
             for tag in tags:
-                data[tag + "_train_" + metric] = best_models[tag][0]["train_" + metric]
-                data[tag + "_val_" + metric] = best_models[tag][0]["test_" + metric]
+                data[tag + "_train_" + metric] = best_models[tag][0][
+                    "train_" + metric
+                ]
+                data[tag + "_val_" + metric] = best_models[tag][0][
+                    "test_" + metric
+                ]
 
             data["DNN_train_" + metric] = DNN_means[metric]
             data["DNN_val_" + metric] = DNN_means["val_" + metric]
@@ -238,17 +242,17 @@ def analize_performance_models(best_models, X, t):
     y_score = dict()
     cmx_list = []
 
-    X_train, X_test, t_train, t_test = train_test_split(X, t, train_size=train_size)
+    X_train, X_test, t_train, t_test = train_test_split(
+        X, t, train_size=train_size
+    )
     for model in best_models:
         best_models[model][1].fit(X_train, t_train)
         y_pred[model] = best_models[model][1].predict(X_test)
         y_score[model] = best_models[model][1].predict_proba(X_test)
 
-    return best_models, X_test,t_test, y_pred, y_score
+    return best_models, X_test, t_test, y_pred, y_score
 
 
-
-"""
 # Example of code
 X = pd.read_csv("test/X.csv")
 X = X.drop(["Unnamed: 0"], axis=1).values
@@ -265,4 +269,3 @@ plt.show()
 print(r)
 print(m)
 # analize_performance_models(a, X, t)
-"""
