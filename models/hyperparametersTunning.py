@@ -61,7 +61,9 @@ def create_random_LDA(
     model = LinearDiscriminantAnalysis(
         solver=random.choice(solver),
         shrinkage=random.choice(shrinkage),
-        tol=round(loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))),
+        tol=round(
+            loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))
+        ),
     )
     return model
 
@@ -87,7 +89,7 @@ def create_random_SVC(
     gamma=["scale", "auto"],
     C=[1e-5, 10],
     decision_function_shape=["ovo", "ovr"],
-    probability=True,
+    probability=[True, False],
 ):
     """Create a SVC model using random hyperparameters."""
     model = SVC(
@@ -95,9 +97,38 @@ def create_random_SVC(
         gamma=random.choice(gamma),
         C=round(loguniform.rvs(C[0], C[1]), int(abs(math.log(C[0], 10)))),
         decision_function_shape=random.choice(decision_function_shape),
-        probability=True,
+        probability=random.choice(probability),
     )
     return model
+
+
+def get_hyperparameters(model, tag):
+    hp = dict()
+    all_hp = model.get_params()
+    if tag == "LR":
+        for i in all_hp:
+            if i in ["penalty", "solver", "max_iter", "C"]:
+                hp[i] = all_hp[i]
+    elif tag == "LDA":
+        for i in all_hp:
+            if i in ["solver", "shrinkage", "tol"]:
+                hp[i] = all_hp[i]
+    elif tag == "KNN":
+        for i in all_hp:
+            if i in ["n_neighbors", "weights", "algorithm, leaf_size"]:
+                hp[i] = all_hp[i]
+    elif tag == "SVC":
+        for i in all_hp:
+            if i in [
+                "kernel",
+                "gamma",
+                "C",
+                "decision_function_shape",
+                "probability",
+            ]:
+                hp[i] = all_hp[i]
+
+    return pd.DataFrame.from_records([hp], index=["hyperparams"])
 
 
 def build_macro_model(model, scaler=StandardScaler()):
@@ -141,7 +172,9 @@ def optimizing_models(
 
     warnings.warn = warn
     best_models = dict()
-    X_train, X_test, t_train, t_test = train_test_split(X, t, train_size=train_size)
+    X_train, X_test, t_train, t_test = train_test_split(
+        X, t, train_size=train_size
+    )
     for tag in models:
         last_accuracy = 0
         print(f"\n***Optimizing {tag} hyperparameters***")
@@ -175,7 +208,7 @@ def plot_best_model(best_models, tag="LR"):
     """Plots the validation curve of the model using its historial results"""
     plt.plot(best_models[tag][0]["train_accuracy"])
     plt.plot(best_models[tag][0]["test_accuracy"])
-    plt.title("Model Accuracy")
+    plt.title("Validation curve with " + tag)
     plt.ylabel("Accuracy")
     plt.xlabel("Iteration (cv)")
     plt.legend(["Trainning", "Test"], loc="lower right")

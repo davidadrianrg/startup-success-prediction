@@ -9,7 +9,7 @@ import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-from models import customized_metrics as cm
+import customized_metrics as cm
 from sklearn.model_selection import train_test_split, KFold
 from tensorflow import keras
 from keras.utils import to_categorical
@@ -56,7 +56,7 @@ def create_random_network(
     )
     # Define some characteristics for the training process
     model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
-    return model
+    return model, optimizer, loss
 
 
 def get_hyperparams(model):
@@ -93,7 +93,7 @@ def optimize_DNN(
     X,
     t,
     kfolds=10,
-    train_size=0.85,
+    train_size=0.8,
     trials=5,
     epochs=50,
     batch_size=40,
@@ -124,8 +124,10 @@ def optimize_DNN(
     # Loop for different trials or models to train in order to find the best
     for row in range(trials):
 
-        model = create_random_network(m, n_classes, metrics=metrics)
-        params, comp = get_hyperparams(model)
+        model_aux, optimizer, loss = create_random_network(
+            m, n_classes, metrics=metrics
+        )
+        params, comp = get_hyperparams(model_aux)
 
         print(f"\n***Trial {row+1} hyperparameters***", end="\n\n")
         print(params, "\n", comp)
@@ -136,6 +138,10 @@ def optimize_DNN(
 
         # Loop that manage cross validation using training set
         for train_index, test_index in cv.split(X_train_set):
+            # This sentence carefully clones the untrained model in each fold in order to avoid unwanted learning weights between them
+            model = keras.models.clone_model(model_aux)
+            model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
             X_train, X_val = X_train_set[train_index], X_train_set[test_index]
             t_train, t_val = t_train_set[train_index], t_train_set[test_index]
 
@@ -172,10 +178,10 @@ def optimize_DNN(
     return best_model, test_set
 
 
-def plot_best_DNN(best_model, metric):
+def plot_best_DNN(best_model, metric="accuracy"):
     """Plots the validation curve of the model using its historial results"""
-    plt.plot(np.concatenate(best_model[1][metric]))
-    plt.plot(np.concatenate(best_model[1]["val_" + metric]))
+    plt.plot(np.mean(best_model[0][1][metric], axis=0))
+    plt.plot(np.mean(best_model[0][1]["val_" + metric], axis=0))
     plt.title("Model " + metric)
     plt.ylabel(metric)
     plt.xlabel("Iteration (epoch)")
@@ -184,12 +190,14 @@ def plot_best_DNN(best_model, metric):
 
 
 """
-Example of code
-X = pd.read_csv("X.csv")
+# Example of code
+X = pd.read_csv("./test/X.csv")
 X = X.drop(["Unnamed: 0"], axis=1).values
-t = pd.read_csv("t.csv")
+t = pd.read_csv("./test/t.csv")
 t = t["labels"].values
 n, m = X.shape
 n_classes = len(np.unique(t))
 
-best = optimize_DNN(X, t, epochs=5, kfolds=2, trials=1)"""
+best = optimize_DNN(X, t, epochs=200, kfolds=10, trials=2)
+plot_best_DNN(best)
+"""
