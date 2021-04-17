@@ -1,14 +1,14 @@
-import hyperparametersTunning as hpTune
-import hyperparametersDNN as hpDNN
+from models import hyperparametersTunning as hpTune
+from models import hyperparametersDNN as hpDNN
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 import os
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2" # To disable Tensorflow GPU Warnings
 
-import customized_metrics as cm
+from models import customized_metrics as cm
 from tensorflow.math import confusion_matrix
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
@@ -158,10 +158,7 @@ def analize_performance_DNN(
     y_pred_len = len(y_pred)
     y_out = [round(y_pred[i].index(max(y_pred[i]))) for i in range(y_pred_len)]
     y_out_bin = to_categorical(t_test, num_classes=n_classes)
-
-    m = calculate_cmatrix_DNN(t_test, y_out)
-    calculate_roc_curve(t_test, y_pred_proba, "DNN")
-    return results, m
+    return results, X_test, t_test, y_out, y_pred_proba
 
 
 def calculate_cmatrix_DNN(t_test, y_pred):
@@ -240,7 +237,6 @@ def analize_performance_models(best_models, X, t):
     best_models = best_models[0]
     y_pred = dict()
     y_score = dict()
-    cmx_list = []
 
     X_train, X_test, t_train, t_test = train_test_split(
         X, t, train_size=train_size
@@ -252,7 +248,13 @@ def analize_performance_models(best_models, X, t):
 
     return best_models, X_test, t_test, y_pred, y_score
 
+def get_hyperparams(model, tag):
+    return hpTune.get_hyperparameters(model,tag)
 
+def get_hyperparams_DNN(model):
+    return hpDNN.get_hyperparams(model)
+
+"""
 # Example of code
 X = pd.read_csv("test/X.csv")
 X = X.drop(["Unnamed: 0"], axis=1).values
@@ -269,3 +271,4 @@ plt.show()
 print(r)
 print(m)
 # analize_performance_models(a, X, t)
+"""

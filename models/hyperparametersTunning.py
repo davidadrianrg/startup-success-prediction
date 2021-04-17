@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import random
 import math
 import warnings
@@ -89,7 +90,7 @@ def create_random_SVC(
     gamma=["scale", "auto"],
     C=[1e-5, 10],
     decision_function_shape=["ovo", "ovr"],
-    probability=[True, False],
+    probability=True,
 ):
     """Create a SVC model using random hyperparameters."""
     model = SVC(
@@ -97,7 +98,7 @@ def create_random_SVC(
         gamma=random.choice(gamma),
         C=round(loguniform.rvs(C[0], C[1]), int(abs(math.log(C[0], 10)))),
         decision_function_shape=random.choice(decision_function_shape),
-        probability=random.choice(probability),
+        probability=probability,
     )
     return model
 
