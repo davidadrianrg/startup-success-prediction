@@ -297,11 +297,11 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         report.print_title("Exactitud media: Compara la exactitud de cada modelo en función de sus hiperparámetros", 4)
         report.print_line()
         for model in best_models:
-            report.print_val_curve_model(
+            report.print_mean_acc_model(
                 best_models,
                 model,
-                filename="validation_curve_" + model + ".png",
-                img_title="Curva de validación de " + model,
+                filename="mean_accuracy_" + model + ".png",
+                img_title="Exactitud media de " + model,
             )
         report.print_title(
             "Curva de validación: Compara los resultados del modelo en función de sus hiperparámetros", 4

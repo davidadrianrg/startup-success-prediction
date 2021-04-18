@@ -551,29 +551,29 @@ class Report:
         # Saving image to file and report
         self.save_image(fig, filename, img_title, **kwargs)
 
-    def print_val_curve_model(
+    def print_mean_acc_model(
         self,
         best_models: tuple,
         tag: str,
-        filename: str = "validation_curve.png",
-        img_title: str = "Validation Curve",
+        filename: str = "mean_accuracy.png",
+        img_title: str = "Mean Accuracy",
         **kwargs,
     ):
-        """Plot the validation curve of the model using its historial results to the report.
+        """Plot the mean accuracy of the model using its historial results to the report.
 
-        :param best_models: Tuple with the best models to print their validation curves
+        :param best_models: Tuple with the best models to print their mean accuracy curves
         :type best_models: tuple
         :param tag: String with the tag of the model to be printed
         :type tag: str
-        :param filename: String with the filename of the output image, defaults to "validation_curve.png"
+        :param filename: String with the filename of the output image, defaults to "mean_accuracy.png"
         :type filename: str, optional
-        :param img_title: String with the title of the output image, defaults to "Validation Curve"
+        :param img_title: String with the title of the output image, defaults to "Mean Accuracy"
         :type img_title: str, optional
         """
         fig, ax = plt.subplots()
         ax.plot(best_models[tag][0]["train_accuracy"])
         ax.plot(best_models[tag][0]["test_accuracy"])
-        ax.set_title("Validation curve with " + tag)
+        ax.set_title(img_title)
         ax.set_ylabel("Accuracy")
         ax.set_xlabel("Iteration (cv)")
         ax.legend(["Trainning", "Test"], loc="lower right")
