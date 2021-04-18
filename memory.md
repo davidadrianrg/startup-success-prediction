@@ -4,9 +4,7 @@
 ## <center>Máster en Informática Industrial y Robótica
 ---
 ###  <center> _Víctor Caínzos López & David Adrián García Rodríguez_
-<p align="center">
-<img src="https://cooperacion.udelar.edu.uy/es/wp-content/uploads/2016/02/Universidade-da-Coru%C3%B1a-470x260.png" title="Perfiles aerodinamicos.">
-</p>
+<br>
 
 ## Introducción
 <p style='text-align: justify;'> El objetivo de nuestro modelo de aprendizaje automático será predecir si una empresa puede tener éxito o
@@ -47,10 +45,10 @@ De la misma forma, se aconseja revisar el documento:
 
 import numpy as np
 import pandas as pd
-from test import old_preprocessing as oldpr
+
+from models import models_evaluation as mdleval
 from postprocessing.report import Report
 from preprocessing import preprocessing as prp
-from models import models_evaluation as mdleval
 ```
 
 ## Índice
