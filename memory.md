@@ -271,7 +271,7 @@ def train_models(X: np.ndarray, t: np.ndarray):
 <div id='id3' />
 
 ## 3. Análisis de los resultados
-<p style='text-align: justify;'>Todos los resultados obtenidos para los experimentos realizados a lo largo del proyecto, descritos en el apartado anterior, se recogen en un report, anexo a al presente informe, donde se pueden visualizar de forma ordenada y comparativa.
+<p style='text-align: justify;'>Todos los resultados obtenidos para los experimentos realizados a lo largo del proyecto, descritos en el apartado anterior, se recogen en un report, donde se pueden visualizar de forma ordenada y comparativa.
   
 <p style='text-align: justify;'>Para la generación de este documento, se crea un módulo específico encargado de construír y elaborar DataFrames explicativos de los datos empleados y los resultados obtenidos de la validación cruzada para cada modelo, además de los correspondientes diagramas de cajas y gráficas de evaluación como las matrices de confusión o las curvas ROC y AUC. Este se encuentra en:
 
