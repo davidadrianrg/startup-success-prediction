@@ -1,0 +1,498 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>models.hyperparametersTunning &mdash; startup-success-prediction  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> startup-success-prediction
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../app.html">Main program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../util.html">Util Functions</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">startup-success-prediction</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>models.hyperparametersTunning</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for models.hyperparametersTunning</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module to optimize hyperparameters and get the best Models.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">loguniform</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.discriminant_analysis</span> <span class="kn">import</span> <span class="n">LinearDiscriminantAnalysis</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">recall_score</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">cross_validate</span><span class="p">,</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+
+
+<div class="viewcode-block" id="select_models"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.select_models">[docs]</a><span class="k">def</span> <span class="nf">select_models</span><span class="p">(</span><span class="n">LR</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">LDA</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">KNN</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">SVC</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a list which contains the tags of the models that are going to be tested for the best.</span>
+
+<span class="sd">    :param LR: If True, appends the Logistic Regression model tag, defaults to True</span>
+<span class="sd">    :type LR: bool, optional</span>
+<span class="sd">    :param LDA: If True, appends the Linear Discriminant Analysis model tag, defaults to True</span>
+<span class="sd">    :type LDA: bool, optional</span>
+<span class="sd">    :param KNN: If True, appends the K-nearest neighbors model tag, defaults to True</span>
+<span class="sd">    :type KNN: bool, optional</span>
+<span class="sd">    :param SVC: If True, appends the Support Vector Machine model tag, defaults to True</span>
+<span class="sd">    :type SVC: bool, optional</span>
+<span class="sd">    :return: A list with the selected model tags.</span>
+<span class="sd">    :rtype: list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">LR</span><span class="p">:</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;LR&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">LDA</span><span class="p">:</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;LDA&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">KNN</span><span class="p">:</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;KNN&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">SVC</span><span class="p">:</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;SVC&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">models</span> <span class="ow">is</span> <span class="p">[]:</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;LR&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">models</span></div>
+
+
+<div class="viewcode-block" id="create_random_LR"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.create_random_LR">[docs]</a><span class="k">def</span> <span class="nf">create_random_LR</span><span class="p">(</span>
+    <span class="n">penalty</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;l1&quot;</span><span class="p">,</span> <span class="s2">&quot;l2&quot;</span><span class="p">,</span> <span class="s2">&quot;elasticnet&quot;</span><span class="p">),</span>
+    <span class="n">solver</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;liblinear&quot;</span><span class="p">,</span> <span class="s2">&quot;sag&quot;</span><span class="p">,</span> <span class="s2">&quot;saga&quot;</span><span class="p">,</span> <span class="s2">&quot;newton-cg&quot;</span><span class="p">,</span> <span class="s2">&quot;lbfgs&quot;</span><span class="p">),</span>
+    <span class="n">max_iter</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+    <span class="n">C</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LogisticRegression</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a Logistic Regression model using random hyperparameters.</span>
+
+<span class="sd">    :param penalty: Tuple with the penalty hyperparameters, defaults to (&quot;none&quot;, &quot;l1&quot;, &quot;l2&quot;, &quot;elasticnet&quot;)</span>
+<span class="sd">    :type penalty: tuple, optional</span>
+<span class="sd">    :param solver: Tuple with the solver hyperparameters, defaults to (&quot;liblinear&quot;, &quot;sag&quot;, &quot;saga&quot;, &quot;newton-cg&quot;, &quot;lbfgs&quot;)</span>
+<span class="sd">    :type solver: tuple, optional</span>
+<span class="sd">    :param max_iter: Tuple with the max_iter hyperparameters, defaults to (100, 1000)</span>
+<span class="sd">    :type max_iter: tuple, optional</span>
+<span class="sd">    :param C: Tuple with the C hyperparameters, defaults to (1e-5, 10)</span>
+<span class="sd">    :type C: tuple, optional</span>
+<span class="sd">    :return: A LogisticRegresion model with the random hyperparameters.</span>
+<span class="sd">    :rtype: LogisticRegression</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span>
+        <span class="n">penalty</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">penalty</span><span class="p">),</span>
+        <span class="n">solver</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">solver</span><span class="p">),</span>
+        <span class="n">max_iter</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">loguniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">max_iter</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_iter</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+        <span class="n">C</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">loguniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)))),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="create_random_LDA"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.create_random_LDA">[docs]</a><span class="k">def</span> <span class="nf">create_random_LDA</span><span class="p">(</span>
+    <span class="n">solver</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;svd&quot;</span><span class="p">,</span> <span class="s2">&quot;lsqr&quot;</span><span class="p">,</span> <span class="s2">&quot;eigen&quot;</span><span class="p">),</span>
+    <span class="n">shrinkage</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">5</span><span class="p">),</span> <span class="s2">&quot;none&quot;</span><span class="p">),</span>
+    <span class="n">tol</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LinearDiscriminantAnalysis</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a Linear Discriminant model using random hyperparameters.</span>
+
+<span class="sd">    :param solver: Tuple with the solver hyperparameters, defaults to (&quot;svd&quot;, &quot;lsqr&quot;, &quot;eigen&quot;)</span>
+<span class="sd">    :type solver: tuple, optional</span>
+<span class="sd">    :param shrinkage: Tuple with the shrinkage hyperparameters, defaults to (&quot;auto&quot;, round(random.uniform(1e-5, 1), 5), &quot;none&quot;)</span>
+<span class="sd">    :type shrinkage: tuple, optional</span>
+<span class="sd">    :param tol: Tuple with the tolerance hyperparameters, defaults to (1e-5, 1e-3)</span>
+<span class="sd">    :type tol: tuple, optional</span>
+<span class="sd">    :return: A LinearDiscriminantAnalysis model with the random hyperparameters.</span>
+<span class="sd">    :rtype: LinearDiscriminantAnalysis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LinearDiscriminantAnalysis</span><span class="p">(</span>
+        <span class="n">solver</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">solver</span><span class="p">),</span>
+        <span class="n">shrinkage</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">shrinkage</span><span class="p">),</span>
+        <span class="n">tol</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">loguniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">tol</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tol</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">tol</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)))),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="create_random_KNN"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.create_random_KNN">[docs]</a><span class="k">def</span> <span class="nf">create_random_KNN</span><span class="p">(</span>
+    <span class="n">n_neighbors</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">),</span>
+    <span class="n">algorithm</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;ball_tree&quot;</span><span class="p">,</span> <span class="s2">&quot;kd_tree&quot;</span><span class="p">,</span> <span class="s2">&quot;brute&quot;</span><span class="p">),</span>
+    <span class="n">leaf_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">150</span><span class="p">),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KNeighborsClassifier</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a K-nearest neighbors model using random hyperparameters.</span>
+
+<span class="sd">    :param n_neighbors: Tuple with the number of neighbors hyperparameters, defaults to (5, 200)</span>
+<span class="sd">    :type n_neighbors: tuple, optional</span>
+<span class="sd">    :param weights: Tuple with the weights hyperparameters, defaults to (&quot;uniform&quot;, &quot;distance&quot;)</span>
+<span class="sd">    :type weights: tuple, optional</span>
+<span class="sd">    :param algorithm: Tuple with the algorithms to use as hyperparameters, defaults to (&quot;auto&quot;, &quot;ball_tree&quot;, &quot;kd_tree&quot;, &quot;brute&quot;)</span>
+<span class="sd">    :type algorithm: tuple, optional</span>
+<span class="sd">    :param leaf_size: Tuple with the leaf_size hyperparameters, defaults to (15, 150)</span>
+<span class="sd">    :type leaf_size: tuple, optional</span>
+<span class="sd">    :return: A KNeighborsClassifier model with the random hyperparameters.</span>
+<span class="sd">    :rtype: KNeighborsClassifier</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span>
+        <span class="n">n_neighbors</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">n_neighbors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_neighbors</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="n">weights</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span>
+        <span class="n">algorithm</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">algorithm</span><span class="p">),</span>
+        <span class="n">leaf_size</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">leaf_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">leaf_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="create_random_SVC"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.create_random_SVC">[docs]</a><span class="k">def</span> <span class="nf">create_random_SVC</span><span class="p">(</span>
+    <span class="n">kernel</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;poly&quot;</span><span class="p">,</span> <span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="s2">&quot;sigmoid&quot;</span><span class="p">,</span> <span class="s2">&quot;precomputed&quot;</span><span class="p">),</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;scale&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">),</span>
+    <span class="n">C</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">decision_function_shape</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;ovo&quot;</span><span class="p">,</span> <span class="s2">&quot;ovr&quot;</span><span class="p">),</span>
+    <span class="n">probability</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SVC</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a Support Vector Machine model using random hyperparameters.</span>
+
+<span class="sd">    :param kernel: Tuple with the kernel hyperparameters, defaults to (&quot;linear&quot;, &quot;poly&quot;, &quot;rbf&quot;, &quot;sigmoid&quot;, &quot;precomputed&quot;)</span>
+<span class="sd">    :type kernel: tuple, optional</span>
+<span class="sd">    :param gamma: Tuple with the gamma hyperparameters, defaults to (&quot;scale&quot;, &quot;auto&quot;)</span>
+<span class="sd">    :type gamma: tuple, optional</span>
+<span class="sd">    :param C: Tuple with C hyperparameters, defaults to (1e-5, 10)</span>
+<span class="sd">    :type C: tuple, optional</span>
+<span class="sd">    :param decision_function_shape: Tuple with the decision_function_shape hyperparameters, defaults to (&quot;ovo&quot;, &quot;ovr&quot;)</span>
+<span class="sd">    :type decision_function_shape: tuple, optional</span>
+<span class="sd">    :param probability: Boolean to enable probability prediction, defaults to True</span>
+<span class="sd">    :type probability: tuple, optional</span>
+<span class="sd">    :return: A SVC model with the random hyperparameters.</span>
+<span class="sd">    :rtype: SVC</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">kernel</span><span class="p">),</span>
+        <span class="n">gamma</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">gamma</span><span class="p">),</span>
+        <span class="n">C</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">loguniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)))),</span>
+        <span class="n">decision_function_shape</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">decision_function_shape</span><span class="p">),</span>
+        <span class="n">probability</span><span class="o">=</span><span class="n">probability</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="get_hyperparameters"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.get_hyperparameters">[docs]</a><span class="k">def</span> <span class="nf">get_hyperparameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return a pandas DataFrame with the hyperparameters of the given model.</span>
+
+<span class="sd">    :param model: Model to get hyperparameters</span>
+<span class="sd">    :type model: BaseEstimator</span>
+<span class="sd">    :param tag: Name of the model to get hyperparameters</span>
+<span class="sd">    :type tag: str</span>
+<span class="sd">    :return: A pandas DataFrame with the hyperparameters used in the given model.</span>
+<span class="sd">    :rtype: pd.Dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">all_hp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;LR&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_hp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;penalty&quot;</span><span class="p">,</span> <span class="s2">&quot;solver&quot;</span><span class="p">,</span> <span class="s2">&quot;max_iter&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">]:</span>
+                <span class="n">hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;LDA&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_hp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;solver&quot;</span><span class="p">,</span> <span class="s2">&quot;shrinkage&quot;</span><span class="p">,</span> <span class="s2">&quot;tol&quot;</span><span class="p">]:</span>
+                <span class="n">hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;KNN&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_hp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;n_neighbors&quot;</span><span class="p">,</span> <span class="s2">&quot;weights&quot;</span><span class="p">,</span> <span class="s2">&quot;algorithm, leaf_size&quot;</span><span class="p">]:</span>
+                <span class="n">hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;SVC&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_hp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;kernel&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;gamma&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;decision_function_shape&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;probability&quot;</span><span class="p">,</span>
+            <span class="p">]:</span>
+                <span class="n">hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_hp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">([</span><span class="n">hp</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;hyperparams&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="build_macro_model"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.build_macro_model">[docs]</a><span class="k">def</span> <span class="nf">build_macro_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">scaler</span><span class="p">:</span> <span class="n">TransformerMixin</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Pipeline</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create a macro model pipeline using the given scaler.</span>
+
+<span class="sd">    :param model: A model to use in the macro model pipeline</span>
+<span class="sd">    :type model: BaseEstimator</span>
+<span class="sd">    :param scaler: An scaler to preprocess de model, defaults to StandardScaler()</span>
+<span class="sd">    :type scaler: TransformerMixin, optional</span>
+<span class="sd">    :return: A macro model pipeline with the scaler preprocessing feature.</span>
+<span class="sd">    :rtype: Pipeline</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">macro_model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">scaler</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">macro_model</span></div>
+
+
+<div class="viewcode-block" id="random_model"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.random_model">[docs]</a><span class="k">def</span> <span class="nf">random_model</span><span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseEstimator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Wrapp the functions of create_random model.</span>
+
+<span class="sd">    :param tag: String tag with the choosen model to be created</span>
+<span class="sd">    :type tag: str</span>
+<span class="sd">    :return: The selected model with random hyperparameters.</span>
+<span class="sd">    :rtype: BaseEstimator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;LR&quot;</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">create_random_LR</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;LDA&quot;</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">create_random_LDA</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;KNN&quot;</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">create_random_KNN</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;SVC&quot;</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">create_random_SVC</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="optimizing_models"><a class="viewcode-back" href="../../util.html#models.hyperparametersTunning.optimizing_models">[docs]</a><span class="k">def</span> <span class="nf">optimizing_models</span><span class="p">(</span>
+    <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">train_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.85</span><span class="p">,</span>
+    <span class="n">scoring</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;recall&quot;</span><span class="p">:</span> <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;specificity&quot;</span><span class="p">:</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">recall_score</span><span class="p">,</span> <span class="n">pos_label</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;f1&quot;</span><span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;roc_auc&quot;</span><span class="p">:</span> <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">cv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">25</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Optimize hyperparameters of the given model and returns the best of them using cross validation.</span>
+
+<span class="sd">    :param models: List with the selected model to be evaluated.</span>
+<span class="sd">    :type models: list</span>
+<span class="sd">    :param X: Characteristic matrix numpy array of the dataset which will be evaluated</span>
+<span class="sd">    :type X: np.ndarray</span>
+<span class="sd">    :param t: Vector labels numpy array of the dataset which will be evaluated</span>
+<span class="sd">    :type t: np.ndarray</span>
+<span class="sd">    :param train_size: % of the data to be splitted into train and test values, defaults to 0.85</span>
+<span class="sd">    :type train_size: float, optional</span>
+<span class="sd">    :param scoring: A dictionary with the wanted metrics to compare and evaluate the different models, defaults to { &quot;accuracy&quot;: &quot;accuracy&quot;, &quot;recall&quot;: &quot;recall&quot;, &quot;specificity&quot;: make_scorer(recall_score, pos_label=0), &quot;precision&quot;: &quot;precision&quot;, &quot;f1&quot;: &quot;f1&quot;, &quot;roc_auc&quot;: &quot;roc_auc&quot;, }</span>
+<span class="sd">    :type scoring: dict, optional</span>
+<span class="sd">    :param cv: Number of folds for the cross validation algorithm, defaults to 10</span>
+<span class="sd">    :type cv: int, optional</span>
+<span class="sd">    :param trials: Number of trials used to generate random models with different hyperparameters, defaults to 25</span>
+<span class="sd">    :type trials: int, optional</span>
+<span class="sd">    :return: A dictionary with the scores and models trained using cross validation</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;accuracy&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scoring</span><span class="p">:</span>
+        <span class="n">scoring</span><span class="p">[</span><span class="s2">&quot;accuracy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span>
+
+    <span class="n">best_models</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">t_train</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">last_accuracy</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">***Optimizing </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2"> hyperparameters***&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+            <span class="n">current_model</span> <span class="o">=</span> <span class="n">random_model</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="n">macro_model</span> <span class="o">=</span> <span class="n">build_macro_model</span><span class="p">(</span><span class="n">current_model</span><span class="p">)</span>
+            <span class="n">scores</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span>
+                <span class="n">macro_model</span><span class="p">,</span>
+                <span class="n">X_train</span><span class="p">,</span>
+                <span class="n">t_train</span><span class="p">,</span>
+                <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+                <span class="n">scoring</span><span class="o">=</span><span class="n">scoring</span><span class="p">,</span>
+                <span class="n">return_train_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">mean_accuracy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">[</span><span class="s2">&quot;test_accuracy&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">mean_accuracy</span> <span class="o">&gt;</span> <span class="n">last_accuracy</span><span class="p">:</span>
+                <span class="n">best_models</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="n">macro_model</span><span class="p">)</span>
+                <span class="n">last_accuracy</span> <span class="o">=</span> <span class="n">mean_accuracy</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Best accuracy so far: &quot;</span><span class="p">,</span> <span class="n">last_accuracy</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Score:&quot;</span><span class="p">,</span>
+            <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">last_accuracy</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+            <span class="n">macro_model</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">best_models</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, David Adrian Rodriguez Garcia &amp; Victor Cainzos Lopez.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,535 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>main &mdash; startup-success-prediction  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> startup-success-prediction
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../app.html">Main program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../util.html">Util Functions</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">startup-success-prediction</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>main</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Main file of the program to train a model for startup success prediction.&quot;&quot;&quot;</span>
+
+<span class="c1"># Importing required modules</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">environ</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">filterwarnings</span>
+
+<span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span>  <span class="c1"># To disable Tensorflow GPU Warnings</span>
+<span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">models_evaluation</span> <span class="k">as</span> <span class="n">mdleval</span>
+<span class="kn">from</span> <span class="nn">postprocessing.report</span> <span class="kn">import</span> <span class="n">Report</span>
+<span class="kn">from</span> <span class="nn">preprocessing</span> <span class="kn">import</span> <span class="n">preprocessing</span> <span class="k">as</span> <span class="n">prp</span>
+
+
+<div class="viewcode-block" id="make_preprocessing"><a class="viewcode-back" href="../app.html#main.make_preprocessing">[docs]</a><span class="k">def</span> <span class="nf">make_preprocessing</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Clean and prepare the dataframe of the input filepath to train machine learning models.</span>
+
+<span class="sd">    :param filepath: String with the filepath of the dataframe to be preprocessed</span>
+<span class="sd">    :type filepath: str</span>
+<span class="sd">    :return: A pandas Dataframe with the data preprocessed</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load a dataframe to preprocess from the given filepath</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">read_dataset</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="c1"># Clean the dataset of lost values</span>
+    <span class="n">drop_duplicates</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+    <span class="n">to_drop</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;Unnamed: 0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Unnamed: 6&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;latitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;longitude&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;zip_code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;object_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;status&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_missing</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">drop_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">drop_duplicates</span><span class="p">,</span> <span class="n">to_drop</span><span class="p">)</span>
+
+    <span class="c1"># Fill empty values with zeros</span>
+    <span class="n">empty_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;age_first_milestone_year&quot;</span><span class="p">,</span> <span class="s2">&quot;age_last_milestone_year&quot;</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">fill_empty_values</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">empty_labels</span><span class="p">)</span>
+
+    <span class="c1"># Transform data values to datatime</span>
+    <span class="n">date_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;closed_at&quot;</span><span class="p">,</span> <span class="s2">&quot;founded_at&quot;</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">date_labels</span><span class="p">)</span>
+
+    <span class="c1"># Use the last date of the last year registered considered as the end of the study period</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">to_last_date</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;closed_at&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Define the ages of the startups being active as a new feature</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;last_date&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;founded_at&quot;</span><span class="p">]</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;age&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">age</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Clean the dataset from spurious data, negative years and non-sense data</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_spurious</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">eliminate_spurious_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Recode non numerical columns to numerical ones</span>
+    <span class="n">non_numerical</span> <span class="o">=</span> <span class="s2">&quot;state_code&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">non_numerical_recoding</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">non_numerical</span><span class="p">)</span>
+
+    <span class="c1"># Normalize quantitative data</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_skewness</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">norm_features</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">data_normalization</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Get X and t from the dataset using the column tags</span>
+    <span class="n">x_tags</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;state_code&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;age_last_funding_year&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;age_first_milestone_year&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;age_last_milestone_year&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;funding_rounds&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;milestones&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_CA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_NY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_MA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_TX&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_otherstate&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_software&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_web&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_mobile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_enterprise&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_advertising&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_gamesvideo&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_ecommerce&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_biotech&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_consulting&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_othercategory&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;has_VC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;has_angel&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;has_roundA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;has_roundB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;has_roundC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;has_roundD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;avg_participants&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;is_top500&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;age&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;norm_funding_total_usd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;norm_age_first_funding_year&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;norm_relationships&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">label_tag</span> <span class="o">=</span> <span class="s2">&quot;labels&quot;</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">prp</span><span class="o">.</span><span class="n">split_X_t</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">x_tags</span><span class="p">,</span> <span class="n">label_tag</span><span class="p">)</span>
+
+    <span class="c1"># Make a dictionary with the dataframes to be returned</span>
+
+    <span class="n">dataframes_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span>
+        <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(),</span>
+        <span class="s2">&quot;Data Missing&quot;</span><span class="p">:</span> <span class="n">data_missing</span><span class="p">,</span>
+        <span class="s2">&quot;Data Spurious&quot;</span><span class="p">:</span> <span class="n">data_spurious</span><span class="p">,</span>
+        <span class="s2">&quot;Data Skewness&quot;</span><span class="p">:</span> <span class="n">data_skewness</span><span class="p">,</span>
+        <span class="s2">&quot;Data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Make a features list to be returned</span>
+
+    <span class="n">features_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">features</span><span class="p">,</span> <span class="n">norm_features</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">dataframes_dict</span><span class="p">,</span> <span class="n">features_list</span></div>
+
+
+<div class="viewcode-block" id="train_models"><a class="viewcode-back" href="../app.html#main.train_models">[docs]</a><span class="k">def</span> <span class="nf">train_models</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Train different models using the dataset and its labels.</span>
+
+<span class="sd">    :param X: Input values of the dataset</span>
+<span class="sd">    :type X: numpy.ndarray</span>
+<span class="sd">    :param t: Label values for the exit of the dataset</span>
+<span class="sd">    :type t: numpy.ndarray</span>
+<span class="sd">    :return: A tuple containing the results of the training, and the best_models and best_DNN tuples of the models</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Wrapper function of optimize_models and optimize_DNN functions in hyperparameters modules</span>
+
+    <span class="c1"># Ask user for the training trials, epochs and folds</span>
+    <span class="n">trials</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Introduce el número de intentos aleatorios en la generación de los modelos: &quot;</span><span class="p">))</span>
+    <span class="n">epochs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Introduce el número de iteraciones máximo: &quot;</span><span class="p">))</span>
+    <span class="n">cv</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Introduce el número de folds para la validación cruzada: &quot;</span><span class="p">))</span>
+    <span class="c1"># Return a tuple with a dict with the best models validated and the train size and the best DNN model</span>
+    <span class="c1"># Using the hyperperameters ranges given in the arguments</span>
+    <span class="n">best_models</span><span class="p">,</span> <span class="n">best_DNN</span> <span class="o">=</span> <span class="n">mdleval</span><span class="o">.</span><span class="n">get_best_models</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="n">trials</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">)</span>
+
+    <span class="c1"># Return a dataframe with validation results of the models in visutalization mode.</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">mdleval</span><span class="o">.</span><span class="n">get_results</span><span class="p">(</span><span class="n">best_models</span><span class="p">,</span> <span class="n">best_DNN</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span><span class="p">,</span> <span class="n">best_models</span><span class="p">,</span> <span class="n">best_DNN</span></div>
+
+
+<div class="viewcode-block" id="make_report"><a class="viewcode-back" href="../app.html#main.make_report">[docs]</a><span class="k">def</span> <span class="nf">make_report</span><span class="p">(</span><span class="n">df_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">features_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">best_models</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">best_DNN</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a report taking into account the given data.</span>
+
+<span class="sd">    :param df_dict: Dictionary with pandas Dataframes to be included in the report</span>
+<span class="sd">    :type df_dict: dict</span>
+<span class="sd">    :param features_list: List with the features taken from the preprocessing</span>
+<span class="sd">    :type features_list: list</span>
+<span class="sd">    :param results: Pandas Dataframe with the results of the training</span>
+<span class="sd">    :type results: pd.DataFrame</span>
+<span class="sd">    :param best_models: Tuple containing the models trained</span>
+<span class="sd">    :type best_models: tuple</span>
+<span class="sd">    :param best_DNN: Tuple containing the neural network trained</span>
+<span class="sd">    :type best_DNN: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Processing the data to be passed to the Report class in the right format</span>
+    <span class="n">results_tags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_val_accuracy&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">results_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_val_accuracy&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">results_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results_labels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">results_tags</span><span class="p">:</span>
+        <span class="n">results_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">tag</span><span class="p">:</span> <span class="n">results</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s2">&quot;_val_accuracy&quot;</span><span class="p">]})</span>
+        <span class="n">results_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="c1"># To analize the models is needed to fit them using analize_performance_models function from models_evaluation module</span>
+    <span class="n">best_models</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_score</span> <span class="o">=</span> <span class="n">mdleval</span><span class="o">.</span><span class="n">analize_performance_models</span><span class="p">(</span>
+        <span class="n">best_models</span><span class="p">,</span> <span class="n">df_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">),</span> <span class="n">df_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="c1"># Same function calling for the DNN models</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">t_test_dnn</span><span class="p">,</span> <span class="n">y_pred_dnn</span><span class="p">,</span> <span class="n">y_pred_proba_dnn</span> <span class="o">=</span> <span class="n">mdleval</span><span class="o">.</span><span class="n">analize_performance_DNN</span><span class="p">(</span><span class="n">best_DNN</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">Report</span><span class="p">(</span><span class="n">generate_pdf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">report</span><span class="p">:</span>
+        <span class="c1"># Generating the header</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Startup Success Prediction Model&quot;</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;David Adrián Rodríguez García &amp; Víctor Caínzos López&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+
+        <span class="c1"># Generating preprocessing report chapter</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Preprocesado: Preparación de los datos&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;En primer lugar se realizará un análisis del dataset **startup_data.csv** </span>
+<span class="sd">            para el cual se realizará la limpieza de los datos espurios o nulos y se procederá </span>
+<span class="sd">            al filtrado de las columnas representativas y la recodificación de variables cualitativas a cuantitativas.&quot;&quot;&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Data Missing dataframe: Contiene los datos eliminados del dataset original.&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;Data Missing&quot;</span><span class="p">])</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Data Spurious dataframe: Contiene los datos sin sentido del dataset original.&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;Data Spurious&quot;</span><span class="p">])</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Data Skewness dataframe: Contiene los datos con alta dispersión del dataset original.&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;Data Skewness&quot;</span><span class="p">])</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span>
+            <span class="s2">&quot;Boxplot Feature Skewness &gt; 2: Muestra la dispersión de los datos para las características con asimetría mayor que 2.&quot;</span><span class="p">,</span>
+            <span class="mi">4</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_boxplot</span><span class="p">(</span>
+            <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;Data&quot;</span><span class="p">],</span>
+            <span class="n">features_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;boxplot_fskewness.png&quot;</span><span class="p">,</span>
+            <span class="n">img_title</span><span class="o">=</span><span class="s2">&quot;Boxplot Feature Skewness&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span>
+            <span class="s2">&quot;Boxplot Norm Features: Muestra la dispersión de los datos para las características normalizadas.&quot;</span><span class="p">,</span> <span class="mi">4</span>
+        <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_boxplot</span><span class="p">(</span>
+            <span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;Data&quot;</span><span class="p">],</span> <span class="n">features_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;boxplot_normalized.png&quot;</span><span class="p">,</span> <span class="n">img_title</span><span class="o">=</span><span class="s2">&quot;Boxplot Normalized Feature&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;X dataframe: Contiene la matriz de características.&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">])</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;t dataframe: Contiene el vector de etiquetas.&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">df_dict</span><span class="p">[</span><span class="s2">&quot;t&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Generating training report chapter</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Entrenamiento: Comparativa de modelos de aprendizaje automático&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;Se procederá a comparar los resultados obtenidos de diferentes modelos de aprendizaje automático</span>
+<span class="sd">            variando tanto el tipo de modelo como los hiperparámetros de los que depende con el objetivo</span>
+<span class="sd">            de obtener el mejor modelo que prediga el éxito o fracaso de las diferentes startups&quot;&quot;&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Results dataframe: Muestra los resultados de los mejores modelos obtenidos&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Boxplot models: Muestra los valores de exactitud de los diferentes modelos&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_boxplot</span><span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results_data</span><span class="p">),</span>
+            <span class="n">results_labels</span><span class="p">,</span>
+            <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;boxplot_models_accuracy.png&quot;</span><span class="p">,</span>
+            <span class="n">img_title</span><span class="o">=</span><span class="s2">&quot;Boxplot Models Accuracy&quot;</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+            <span class="n">same_scale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Contraste de hipótesis: Comparación de modelos mediante el test de Kruskal-Wallis&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_hpcontrast</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">results_data</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">results_labels</span><span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span>
+            <span class="s2">&quot;Matrices de confusión: Compara los valores reales con los valores predichos para cada modelo&quot;</span><span class="p">,</span> <span class="mi">4</span>
+        <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">:</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">print_confusion_matrix</span><span class="p">(</span>
+                <span class="n">best_models</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">X_test</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                <span class="n">t_test</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;confusion_matrix_&quot;</span> <span class="o">+</span> <span class="n">model</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span>
+                <span class="n">img_title</span><span class="o">=</span><span class="s2">&quot;Matriz de confusión &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="p">,</span>
+                <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Clase Predicha&quot;</span><span class="p">,</span>
+                <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Clase Real&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_confusion_matrix_DNN</span><span class="p">(</span>
+            <span class="n">t_test_dnn</span><span class="p">,</span> <span class="n">y_pred_dnn</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="s2">&quot;Clase Predicha&quot;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Clase Real&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Matriz de confusión DNN&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Curva ROC: Compara el ajuste entre la especificidad y la sensibilidad para cada modelo&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">:</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">print_roc_curve</span><span class="p">(</span>
+                <span class="n">t_test</span><span class="p">,</span> <span class="n">y_score</span><span class="p">[</span><span class="n">model</span><span class="p">],</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;roc_curve_&quot;</span> <span class="o">+</span> <span class="n">model</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span> <span class="n">img_title</span><span class="o">=</span><span class="s2">&quot;Curva ROC de &quot;</span> <span class="o">+</span> <span class="n">model</span>
+            <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_roc_curve</span><span class="p">(</span><span class="n">t_test_dnn</span><span class="p">,</span> <span class="n">y_pred_proba_dnn</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;roc_curve_dnn.png&quot;</span><span class="p">,</span> <span class="n">img_title</span><span class="o">=</span><span class="s2">&quot;Curva ROC de DNN&quot;</span><span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Informe de clasificación: Compara los resultados de cada modelo de clasificación&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">:</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">print_clreport</span><span class="p">(</span><span class="n">t_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">model</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Classification report for model &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_clreport</span><span class="p">(</span><span class="n">t_test_dnn</span><span class="p">,</span> <span class="n">y_pred_dnn</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Classification report for model DNN&quot;</span><span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Exactitud media: Compara la exactitud de cada modelo en función de sus hiperparámetros&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">:</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">print_mean_acc_model</span><span class="p">(</span>
+                <span class="n">best_models</span><span class="p">,</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;mean_accuracy_&quot;</span> <span class="o">+</span> <span class="n">model</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">,</span>
+                <span class="n">img_title</span><span class="o">=</span><span class="s2">&quot;Exactitud media de &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span>
+            <span class="s2">&quot;Curva de validación: Compara los resultados del modelo en función de sus hiperparámetros&quot;</span><span class="p">,</span> <span class="mi">4</span>
+        <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_val_curve_dnn</span><span class="p">(</span><span class="n">best_DNN</span><span class="p">)</span>
+
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span>
+            <span class="s2">&quot;Hiperparámetros: Muestra el dataframe con los hiperparámetros usados en el entrenamiento&quot;</span><span class="p">,</span> <span class="mi">4</span>
+        <span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_line</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">:</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Hiperparámetros del modelo &quot;</span> <span class="o">+</span> <span class="n">model</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">mdleval</span><span class="o">.</span><span class="n">get_hyperparams</span><span class="p">(</span><span class="n">best_models</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">steps</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">model</span><span class="p">))</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_title</span><span class="p">(</span><span class="s2">&quot;Hiperparámetros de la red neuronal&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">dfparams</span><span class="p">,</span> <span class="n">dfcomp</span> <span class="o">=</span> <span class="n">mdleval</span><span class="o">.</span><span class="n">get_hyperparams_DNN</span><span class="p">(</span><span class="n">best_DNN</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">dfparams</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">print_dataframe</span><span class="p">(</span><span class="n">dfcomp</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># Loading and preprocessing the startup dataframe</span>
+    <span class="n">df_dict</span><span class="p">,</span> <span class="n">features_list</span> <span class="o">=</span> <span class="n">make_preprocessing</span><span class="p">(</span><span class="s2">&quot;data/startup_data.csv&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Training different models using the previous dataset</span>
+    <span class="n">results</span><span class="p">,</span> <span class="n">best_models</span><span class="p">,</span> <span class="n">best_DNN</span> <span class="o">=</span> <span class="n">train_models</span><span class="p">(</span><span class="n">df_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">df_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># Generating the report with the results of the training</span>
+    <span class="n">make_report</span><span class="p">(</span><span class="n">df_dict</span><span class="p">,</span> <span class="n">features_list</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">best_models</span><span class="p">,</span> <span class="n">best_DNN</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, David Adrian Rodriguez Garcia &amp; Victor Cainzos Lopez.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
