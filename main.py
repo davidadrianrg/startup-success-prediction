@@ -1,14 +1,28 @@
 """Main file of the program to train a model for startup success prediction."""
 
 # Importing required modules
+from os import environ
+from warnings import filterwarnings
+
+environ["TF_CPP_MIN_LOG_LEVEL"] = "2"  # To disable Tensorflow GPU Warnings
+filterwarnings("ignore")
+
 import numpy as np
 import pandas as pd
+
+from models import models_evaluation as mdleval
 from postprocessing.report import Report
 from preprocessing import preprocessing as prp
-from models import models_evaluation as mdleval
+
 
 def make_preprocessing(filepath: str) -> pd.DataFrame:
-    """Clean and prepare the given dataframe to train ML models."""
+    """Clean and prepare the dataframe of the input filepath to train machine learning models.
+
+    :param filepath: String with the filepath of the dataframe to be preprocessed
+    :type filepath: str
+    :return: A pandas Dataframe with the data preprocessed
+    :rtype: pd.DataFrame
+    """
     # Load a dataframe to preprocess from the given filepath
     data = prp.read_dataset(filepath)
 
@@ -97,7 +111,7 @@ def make_preprocessing(filepath: str) -> pd.DataFrame:
         "Data Missing": data_missing,
         "Data Spurious": data_spurious,
         "Data Skewness": data_skewness,
-        "Data": data
+        "Data": data,
     }
 
     # Make a features list to be returned
@@ -107,13 +121,15 @@ def make_preprocessing(filepath: str) -> pd.DataFrame:
     return dataframes_dict, features_list
 
 
-def train_models(X: np.ndarray, t: np.ndarray):
+def train_models(X: np.ndarray, t: np.ndarray) -> tuple:
     """Train different models using the dataset and its labels.
 
     :param X: Input values of the dataset
     :type X: numpy.ndarray
     :param t: Label values for the exit of the dataset
     :type t: numpy.ndarray
+    :return: A tuple containing the results of the training, and the best_models and best_DNN tuples of the models
+    :rtype: tuple
     """
     # Wrapper function of optimize_models and optimize_DNN functions in hyperparameters modules
 
@@ -132,7 +148,19 @@ def train_models(X: np.ndarray, t: np.ndarray):
 
 
 def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_models: tuple, best_DNN: tuple):
-    """Generate a report taking into account the given data."""
+    """Generate a report taking into account the given data.
+
+    :param df_dict: Dictionary with pandas Dataframes to be included in the report
+    :type df_dict: dict
+    :param features_list: List with the features taken from the preprocessing
+    :type features_list: list
+    :param results: Pandas Dataframe with the results of the training
+    :type results: pd.DataFrame
+    :param best_models: Tuple containing the models trained
+    :type best_models: tuple
+    :param best_DNN: Tuple containing the neural network trained
+    :type best_DNN: tuple
+    """
     # Processing the data to be passed to the Report class in the right format
     results_tags = []
     for i in results.columns:
@@ -144,12 +172,13 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
     for tag in results_tags:
         results_data.update({tag: results[tag + "_val_accuracy"]})
         results_labels.append(tag)
-    
-    # To analize the models is needed to fit them using analize_performance_models function from models_evaluation module
-    best_models, X_test, t_test, y_pred, y_score = mdleval.analize_performance_models(best_models, df_dict.get("X"), df_dict.get("t"))
-    # Same function calling for the DNN models
-    results_DNN, X_test_dnn, t_test_dnn, y_pred_dnn, y_pred_proba_dnn = mdleval.analize_performance_DNN(best_DNN)
 
+    # To analize the models is needed to fit them using analize_performance_models function from models_evaluation module
+    best_models, X_test, t_test, y_pred, y_score = mdleval.analize_performance_models(
+        best_models, df_dict.get("X"), df_dict.get("t")
+    )
+    # Same function calling for the DNN models
+    _, _, t_test_dnn, y_pred_dnn, y_pred_proba_dnn = mdleval.analize_performance_DNN(best_DNN)
 
     with Report(generate_pdf=True) as report:
         # Generating the header
@@ -177,13 +206,25 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         report.print_line()
         report.print_dataframe(df_dict["Data Skewness"])
 
-        report.print_title("Boxplot Feature Skewness > 2: Muestra la dispersión de los datos para las características con asimetría mayor que 2.", 4)
+        report.print_title(
+            "Boxplot Feature Skewness > 2: Muestra la dispersión de los datos para las características con asimetría mayor que 2.",
+            4,
+        )
         report.print_line()
-        report.print_boxplot(df_dict["Data"], features_list[0].tolist(), filename="boxplot_fskewness.png", img_title="Boxplot Feature Skewness")
+        report.print_boxplot(
+            df_dict["Data"],
+            features_list[0].tolist(),
+            filename="boxplot_fskewness.png",
+            img_title="Boxplot Feature Skewness",
+        )
 
-        report.print_title("Boxplot Norm Features: Muestra la dispersión de los datos para las características normalizadas.", 4)
+        report.print_title(
+            "Boxplot Norm Features: Muestra la dispersión de los datos para las características normalizadas.", 4
+        )
         report.print_line()
-        report.print_boxplot(df_dict["Data"], features_list[1], filename="boxplot_normalized.png", img_title="Boxplot Normalized Feature")
+        report.print_boxplot(
+            df_dict["Data"], features_list[1], filename="boxplot_normalized.png", img_title="Boxplot Normalized Feature"
+        )
 
         report.print_title("X dataframe: Contiene la matriz de características.", 4)
         report.print_line()
@@ -207,25 +248,46 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
 
         report.print_title("Boxplot models: Muestra los valores de exactitud de los diferentes modelos", 4)
         report.print_line()
-        report.print_boxplot(pd.DataFrame(results_data), results_labels,filename="boxplot_models_accuracy.png" , img_title="Boxplot Models Accuracy",figsize= (10,7), same_scale=True)
+        report.print_boxplot(
+            pd.DataFrame(results_data),
+            results_labels,
+            filename="boxplot_models_accuracy.png",
+            img_title="Boxplot Models Accuracy",
+            figsize=(10, 7),
+            same_scale=True,
+        )
 
         report.print_title("Contraste de hipótesis: Comparación de modelos mediante el test de Kruskal-Wallis", 4)
         report.print_line()
         report.print_hpcontrast(list(results_data.values()), results_labels)
 
-        report.print_title("Matrices de confusión: Compara los valores reales con los valores predichos para cada modelo", 4)
+        report.print_title(
+            "Matrices de confusión: Compara los valores reales con los valores predichos para cada modelo", 4
+        )
         report.print_line()
         for model in best_models:
-            report.print_confusion_matrix(best_models[model][1], X_test.values, t_test.values, filename="confusion_matrix_" + model + ".png", img_title="Matriz de confusión " + model, xlabel="Clase Predicha", ylabel="Clase Real")
+            report.print_confusion_matrix(
+                best_models[model][1],
+                X_test.values,
+                t_test.values,
+                filename="confusion_matrix_" + model + ".png",
+                img_title="Matriz de confusión " + model,
+                xlabel="Clase Predicha",
+                ylabel="Clase Real",
+            )
         report.print("\n")
-        report.print_confusion_matrix_DNN(t_test_dnn, y_pred_dnn, xlabel="Clase Predicha", ylabel="Clase Real", title="Matriz de confusión DNN")
+        report.print_confusion_matrix_DNN(
+            t_test_dnn, y_pred_dnn, xlabel="Clase Predicha", ylabel="Clase Real", title="Matriz de confusión DNN"
+        )
 
         report.print_title("Curva ROC: Compara el ajuste entre la especificidad y la sensibilidad para cada modelo", 4)
         report.print_line()
         for model in best_models:
-            report.print_roc_curve(t_test, y_score[model], filename="roc_curve_" + model + ".png", img_title="Curva ROC de " + model)
-        report.print_roc_curve(t_test_dnn,y_pred_proba_dnn, filename="roc_curve_dnn.png", img_title="Curva ROC de DNN")
-        
+            report.print_roc_curve(
+                t_test, y_score[model], filename="roc_curve_" + model + ".png", img_title="Curva ROC de " + model
+            )
+        report.print_roc_curve(t_test_dnn, y_pred_proba_dnn, filename="roc_curve_dnn.png", img_title="Curva ROC de DNN")
+
         report.print_title("Informe de clasificación: Compara los resultados de cada modelo de clasificación", 4)
         report.print_line()
         for model in best_models:
@@ -235,12 +297,21 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         report.print_title("Exactitud media: Compara la exactitud de cada modelo en función de sus hiperparámetros", 4)
         report.print_line()
         for model in best_models:
-            report.print_val_curve_model(best_models, model, filename="validation_curve_" + model + ".png", img_title="Curva de validación de " + model)
-        report.print_title("Curva de validación: Compara los resultados del modelo en función de sus hiperparámetros", 4)
+            report.print_val_curve_model(
+                best_models,
+                model,
+                filename="validation_curve_" + model + ".png",
+                img_title="Curva de validación de " + model,
+            )
+        report.print_title(
+            "Curva de validación: Compara los resultados del modelo en función de sus hiperparámetros", 4
+        )
         report.print_line()
         report.print_val_curve_dnn(best_DNN)
 
-        report.print_title("Hiperparámetros: Muestra el dataframe con los hiperparámetros usados en el entrenamiento", 4)
+        report.print_title(
+            "Hiperparámetros: Muestra el dataframe con los hiperparámetros usados en el entrenamiento", 4
+        )
         report.print_line()
         for model in best_models:
             report.print_title("Hiperparámetros del modelo " + model, 5)
