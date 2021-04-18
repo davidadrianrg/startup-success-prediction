@@ -1,0 +1,844 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Util Functions &mdash; startup-success-prediction  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Classes" href="classes.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> startup-success-prediction
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Main program</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Util Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-preprocessing.preprocessing">Preprocessing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-models.models_evaluation">Training modules</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">startup-success-prediction</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Util Functions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/util.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="util-functions">
+<h1>Util Functions<a class="headerlink" href="#util-functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-preprocessing.preprocessing">
+<span id="preprocessing-module"></span><h2>Preprocessing module<a class="headerlink" href="#module-preprocessing.preprocessing" title="Permalink to this headline">¶</a></h2>
+<p>Preprocessing script to clean the Dataset.</p>
+<dl class="py function">
+<dt id="preprocessing.preprocessing.data_normalization">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">data_normalization</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#data_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.data_normalization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize quantitative data of the given dataframe if their skewness is greater than 2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas dataframe with the data with skewness &gt; 2 been normalized</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.drop_values">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">drop_values</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_drop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#drop_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.drop_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop data with no sense, duplicates or NaN values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p></li>
+<li><p><strong>drop_duplicates</strong> (<em>list</em>) – List with the column tags to drop the duplicates</p></li>
+<li><p><strong>to_drop</strong> (<em>list</em>) – List with the column tags to be dropped</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with the data dropped</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.eliminate_spurious_data">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">eliminate_spurious_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#eliminate_spurious_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.eliminate_spurious_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean the dataset from spurious data, negative years and non-sense data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p></li>
+<li><p><strong>sort_value</strong> (<em>str</em>) – String tag value that will be used to sort the Dataframe</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with spurious data cleaned</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.fill_empty_values">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">fill_empty_values</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#fill_empty_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.fill_empty_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill empty values with zeros.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – List with column tags where fill empty values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with no empty values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.non_numerical_recoding">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">non_numerical_recoding</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_numerical</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#non_numerical_recoding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.non_numerical_recoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map all the non numerical data to a categorical number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p></li>
+<li><p><strong>non_numerical</strong> (<em>str</em>) – String tag with the column with non numerical values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with the non_numerical column transformed to numerical data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.read_dataset">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">read_dataset</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#read_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.read_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a pandas DataFrame from csv and return data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – String with the filepath of the file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with the data inside the file</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.split_X_t">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">split_X_t</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tags</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#split_X_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.split_X_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split X and t from a dataset using their colum tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p></li>
+<li><p><strong>x_tags</strong> (<em>list</em>) – List with the column tags to be used for the characteristics matrix</p></li>
+<li><p><strong>label_tag</strong> (<em>str</em>) – List with the column tag of the label column</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple containing the X pandas Dataframe and the t pandas Dataframe</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.to_datetime">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">to_datetime</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#to_datetime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.to_datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change format to datetime.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – List with column tags where dates will be transform to datetime format</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with dates in datetime format</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="preprocessing.preprocessing.to_last_date">
+<code class="sig-prename descclassname"><span class="pre">preprocessing.preprocessing.</span></code><code class="sig-name descname"><span class="pre">to_last_date</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/preprocessing/preprocessing.html#to_last_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#preprocessing.preprocessing.to_last_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the last date of the last year registered considered as the end of the study period.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with the data</p></li>
+<li><p><strong>ref_label</strong> (<em>str</em>) – List with column tags where dates will be filled with the last date registered</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with all dates filled</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-models.models_evaluation">
+<span id="training-modules"></span><h2>Training modules<a class="headerlink" href="#module-models.models_evaluation" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper module to make more usable th hyperparametersTunning and hyperparametersDNN modules.</p>
+<dl class="py function">
+<dt id="models.models_evaluation.analize_performance_DNN">
+<code class="sig-prename descclassname"><span class="pre">models.models_evaluation.</span></code><code class="sig-name descname"><span class="pre">analize_performance_DNN</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_DNN</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="_modules/models/models_evaluation.html#analize_performance_DNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.models_evaluation.analize_performance_DNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the best DNN model and returns the results and the numpy arrays with the test values and predicted values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>best_DNN</strong> (<em>tuple</em>) – Tuple with the best neural network</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple with the numpy arrays with the test values and predicted values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.models_evaluation.analize_performance_models">
+<code class="sig-prename descclassname"><span class="pre">models.models_evaluation.</span></code><code class="sig-name descname"><span class="pre">analize_performance_models</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="_modules/models/models_evaluation.html#analize_performance_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.models_evaluation.analize_performance_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the best models and dataset values and returns the models trained and the numpy arrays with the test values and predicted values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>best_models</strong> (<em>tuple</em>) – Tuple with the best models</p></li>
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Characteristic matrix numpy array of the dataset which will be evaluated</p></li>
+<li><p><strong>t</strong> (<em>np.ndarray</em>) – Vector labels numpy array of the dataset which will be evaluated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple with the models trained and the numpy arrays with the test values and predicted values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.models_evaluation.get_best_models">
+<code class="sig-prename descclassname"><span class="pre">models.models_evaluation.</span></code><code class="sig-name descname"><span class="pre">get_best_models</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">numpy.ndarray,</span> <span class="pre">t:</span> <span class="pre">numpy.ndarray,</span> <span class="pre">models:</span> <span class="pre">list</span> <span class="pre">=</span> <span class="pre">['LR',</span> <span class="pre">'LDA',</span> <span class="pre">'KNN',</span> <span class="pre">'SVC'],</span> <span class="pre">cv:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10,</span> <span class="pre">train_size:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.8,</span> <span class="pre">scoring:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">{'AUC':</span> <span class="pre">'roc_auc',</span> <span class="pre">'accuracy':</span> <span class="pre">'accuracy',</span> <span class="pre">'f1':</span> <span class="pre">'f1',</span> <span class="pre">'precision':</span> <span class="pre">'precision',</span> <span class="pre">'recall':</span> <span class="pre">'recall',</span> <span class="pre">'specificity':</span> <span class="pre">make_scorer(recall_score,</span> <span class="pre">pos_label=0)},</span> <span class="pre">trials:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">2,</span> <span class="pre">epochs:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">50,</span> <span class="pre">batch_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">40,</span> <span class="pre">metrics:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">('accuracy',</span> <span class="pre">'Recall',</span> <span class="pre">&lt;function</span> <span class="pre">specificity&gt;,</span> <span class="pre">'Precision',</span> <span class="pre">&lt;function</span> <span class="pre">f1_score&gt;,</span> <span class="pre">'AUC')</span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="_modules/models/models_evaluation.html#get_best_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.models_evaluation.get_best_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the best models generated with random hyperparameters using the arguments as training hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Characteristic matrix numpy array of the dataset which will be evaluated</p></li>
+<li><p><strong>t</strong> (<em>np.ndarray</em>) – Vector labels numpy array of the dataset which will be evaluated</p></li>
+<li><p><strong>models</strong> (<em>list</em><em>, </em><em>optional</em>) – List with the selected model tags, defaults to hpTune.select_models()</p></li>
+<li><p><strong>cv</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of folds for the cross validation algorithm, defaults to 10</p></li>
+<li><p><strong>train_size</strong> (<em>float</em><em>, </em><em>optional</em>) – % of the data to be splitted into train and test values, defaults to 0.8</p></li>
+<li><p><strong>scoring</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary with the wanted metrics to compare and evaluate the different models, defaults to { “accuracy”: “accuracy”, “recall”: “recall”, “specificity”: make_scorer(recall_score, pos_label=0), “precision”: “precision”, “f1”: “f1”, “AUC”: “roc_auc”, }</p></li>
+<li><p><strong>trials</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of trials used to generate random models with different hyperparameters, defaults to 2</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of maximum iterations allow to converge the algorithm, defaults to 50</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of the batch used to calculate lossing function, defaults to 40</p></li>
+<li><p><strong>metrics</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the metrics to compare and evaluate the differene neural networks, defaults to ( “accuracy”, “Recall”, cm.specificity, “Precision”, cm.f1_score, “AUC”, )</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple containing a tuple with the best_models and train_size and a tuple with the bestDNN model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.models_evaluation.get_hyperparams">
+<code class="sig-prename descclassname"><span class="pre">models.models_evaluation.</span></code><code class="sig-name descname"><span class="pre">get_hyperparams</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">sklearn.base.BaseEstimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/models/models_evaluation.html#get_hyperparams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.models_evaluation.get_hyperparams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapp the get_hyperparameters function in hyperparametersTunning module.</p>
+<p>Return a pandas DataFrame with the hyperparameters of the given model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>BaseEstimator</em>) – Model to get hyperparameters</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Name of the model to get hyperparameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas DataFrame with the hyperparameters used in the given model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.models_evaluation.get_hyperparams_DNN">
+<code class="sig-prename descclassname"><span class="pre">models.models_evaluation.</span></code><code class="sig-name descname"><span class="pre">get_hyperparams_DNN</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">model:</span> <span class="pre">tensorflow.python.keras.engine.sequential.Sequential)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'pandas.core.frame.DataFrame'&gt;</span></em>, <em class="sig-param"><span class="pre">&lt;class</span> <span class="pre">'pandas.core.frame.DataFrame'&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/models_evaluation.html#get_hyperparams_DNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.models_evaluation.get_hyperparams_DNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapp the get_hyperparams function in hyperparametersDNN module.</p>
+<p>Return the hyperparams of the model passed as an argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>keras.models.Sequential</em>) – A keras.models.Sequential neural network model</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple with a pandas Dataframe with the hyperparameters of the neural network and a pandas Dataframe with the parameters of the optimezer used in the model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.models_evaluation.get_results">
+<code class="sig-prename descclassname"><span class="pre">models.models_evaluation.</span></code><code class="sig-name descname"><span class="pre">get_results</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_DNN</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/models/models_evaluation.html#get_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.models_evaluation.get_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the best models and best neural network and returns a pandas Dataframe with the metric results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>best_models</strong> (<em>tuple</em>) – Tuple with the best models</p></li>
+<li><p><strong>best_DNN</strong> (<em>tuple</em>) – Tuple with the best neural network</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas Dataframe with the metric results</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-models.hyperparametersTunning"></span><p>Module to optimize hyperparameters and get the best Models.</p>
+<dl class="py function">
+<dt id="models.hyperparametersTunning.build_macro_model">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">build_macro_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">sklearn.base.BaseEstimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">sklearn.base.TransformerMixin</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">StandardScaler()</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">sklearn.pipeline.Pipeline</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#build_macro_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.build_macro_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a macro model pipeline using the given scaler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>BaseEstimator</em>) – A model to use in the macro model pipeline</p></li>
+<li><p><strong>scaler</strong> (<em>TransformerMixin</em><em>, </em><em>optional</em>) – An scaler to preprocess de model, defaults to StandardScaler()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A macro model pipeline with the scaler preprocessing feature.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Pipeline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.create_random_KNN">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">create_random_KNN</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(5,</span> <span class="pre">200)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('uniform',</span> <span class="pre">'distance')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('auto',</span> <span class="pre">'ball_tree',</span> <span class="pre">'kd_tree',</span> <span class="pre">'brute')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leaf_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(15,</span> <span class="pre">150)</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">sklearn.neighbors._classification.KNeighborsClassifier</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#create_random_KNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.create_random_KNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a K-nearest neighbors model using random hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_neighbors</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the number of neighbors hyperparameters, defaults to (5, 200)</p></li>
+<li><p><strong>weights</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the weights hyperparameters, defaults to (“uniform”, “distance”)</p></li>
+<li><p><strong>algorithm</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the algorithms to use as hyperparameters, defaults to (“auto”, “ball_tree”, “kd_tree”, “brute”)</p></li>
+<li><p><strong>leaf_size</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the leaf_size hyperparameters, defaults to (15, 150)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A KNeighborsClassifier model with the random hyperparameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>KNeighborsClassifier</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.create_random_LDA">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">create_random_LDA</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('svd',</span> <span class="pre">'lsqr',</span> <span class="pre">'eigen')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shrinkage</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('auto',</span> <span class="pre">0.70502,</span> <span class="pre">'none')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(1e-05,</span> <span class="pre">0.001)</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">sklearn.discriminant_analysis.LinearDiscriminantAnalysis</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#create_random_LDA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.create_random_LDA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Linear Discriminant model using random hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the solver hyperparameters, defaults to (“svd”, “lsqr”, “eigen”)</p></li>
+<li><p><strong>shrinkage</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the shrinkage hyperparameters, defaults to (“auto”, round(random.uniform(1e-5, 1), 5), “none”)</p></li>
+<li><p><strong>tol</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the tolerance hyperparameters, defaults to (1e-5, 1e-3)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A LinearDiscriminantAnalysis model with the random hyperparameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>LinearDiscriminantAnalysis</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.create_random_LR">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">create_random_LR</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">penalty</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('none',</span> <span class="pre">'l1',</span> <span class="pre">'l2',</span> <span class="pre">'elasticnet')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('liblinear',</span> <span class="pre">'sag',</span> <span class="pre">'saga',</span> <span class="pre">'newton-cg',</span> <span class="pre">'lbfgs')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(100,</span> <span class="pre">1000)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(1e-05,</span> <span class="pre">10)</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">sklearn.linear_model._logistic.LogisticRegression</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#create_random_LR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.create_random_LR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Logistic Regression model using random hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>penalty</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the penalty hyperparameters, defaults to (“none”, “l1”, “l2”, “elasticnet”)</p></li>
+<li><p><strong>solver</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the solver hyperparameters, defaults to (“liblinear”, “sag”, “saga”, “newton-cg”, “lbfgs”)</p></li>
+<li><p><strong>max_iter</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the max_iter hyperparameters, defaults to (100, 1000)</p></li>
+<li><p><strong>C</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the C hyperparameters, defaults to (1e-5, 10)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A LogisticRegresion model with the random hyperparameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>LogisticRegression</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.create_random_SVC">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">create_random_SVC</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('linear',</span> <span class="pre">'poly',</span> <span class="pre">'rbf',</span> <span class="pre">'sigmoid',</span> <span class="pre">'precomputed')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('scale',</span> <span class="pre">'auto')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(1e-05,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decision_function_shape</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('ovo',</span> <span class="pre">'ovr')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">sklearn.svm._classes.SVC</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#create_random_SVC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.create_random_SVC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Support Vector Machine model using random hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kernel</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the kernel hyperparameters, defaults to (“linear”, “poly”, “rbf”, “sigmoid”, “precomputed”)</p></li>
+<li><p><strong>gamma</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the gamma hyperparameters, defaults to (“scale”, “auto”)</p></li>
+<li><p><strong>C</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with C hyperparameters, defaults to (1e-5, 10)</p></li>
+<li><p><strong>decision_function_shape</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the decision_function_shape hyperparameters, defaults to (“ovo”, “ovr”)</p></li>
+<li><p><strong>probability</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Boolean to enable probability prediction, defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A SVC model with the random hyperparameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>SVC</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.get_hyperparameters">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">get_hyperparameters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">sklearn.base.BaseEstimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#get_hyperparameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.get_hyperparameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pandas DataFrame with the hyperparameters of the given model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>BaseEstimator</em>) – Model to get hyperparameters</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Name of the model to get hyperparameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A pandas DataFrame with the hyperparameters used in the given model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.Dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.optimizing_models">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">optimizing_models</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.85</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">{'accuracy':</span> <span class="pre">'accuracy',</span> <span class="pre">'f1':</span> <span class="pre">'f1',</span> <span class="pre">'precision':</span> <span class="pre">'precision',</span> <span class="pre">'recall':</span> <span class="pre">'recall',</span> <span class="pre">'roc_auc':</span> <span class="pre">'roc_auc',</span> <span class="pre">'specificity':</span> <span class="pre">make_scorer(recall_score,</span> <span class="pre">pos_label=0)}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trials</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">25</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#optimizing_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.optimizing_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimize hyperparameters of the given model and returns the best of them using cross validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> (<em>list</em>) – List with the selected model to be evaluated.</p></li>
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Characteristic matrix numpy array of the dataset which will be evaluated</p></li>
+<li><p><strong>t</strong> (<em>np.ndarray</em>) – Vector labels numpy array of the dataset which will be evaluated</p></li>
+<li><p><strong>train_size</strong> (<em>float</em><em>, </em><em>optional</em>) – % of the data to be splitted into train and test values, defaults to 0.85</p></li>
+<li><p><strong>scoring</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary with the wanted metrics to compare and evaluate the different models, defaults to { “accuracy”: “accuracy”, “recall”: “recall”, “specificity”: make_scorer(recall_score, pos_label=0), “precision”: “precision”, “f1”: “f1”, “roc_auc”: “roc_auc”, }</p></li>
+<li><p><strong>cv</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of folds for the cross validation algorithm, defaults to 10</p></li>
+<li><p><strong>trials</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of trials used to generate random models with different hyperparameters, defaults to 25</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary with the scores and models trained using cross validation</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.random_model">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">random_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">sklearn.base.BaseEstimator</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#random_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.random_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapp the functions of create_random model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tag</strong> (<em>str</em>) – String tag with the choosen model to be created</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The selected model with random hyperparameters.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>BaseEstimator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersTunning.select_models">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersTunning.</span></code><code class="sig-name descname"><span class="pre">select_models</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">LR</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LDA</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KNN</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SVC</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">list</span><a class="reference internal" href="_modules/models/hyperparametersTunning.html#select_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersTunning.select_models" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a list which contains the tags of the models that are going to be tested for the best.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>LR</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, appends the Logistic Regression model tag, defaults to True</p></li>
+<li><p><strong>LDA</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, appends the Linear Discriminant Analysis model tag, defaults to True</p></li>
+<li><p><strong>KNN</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, appends the K-nearest neighbors model tag, defaults to True</p></li>
+<li><p><strong>SVC</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, appends the Support Vector Machine model tag, defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list with the selected model tags.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-models.hyperparametersDNN"></span><p>Module with utils functions to optimize hyperparameters and get the best DNN model.</p>
+<dl class="py function">
+<dt id="models.hyperparametersDNN.create_random_network">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersDNN.</span></code><code class="sig-name descname"><span class="pre">create_random_network</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">m:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">n_classes:</span> <span class="pre">int</span></em>, <em class="sig-param"><span class="pre">metrics:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'accuracy'</span></em>, <em class="sig-param"><span class="pre">layers:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">(1</span></em>, <em class="sig-param"><span class="pre">5)</span></em>, <em class="sig-param"><span class="pre">n:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">(10</span></em>, <em class="sig-param"><span class="pre">20)</span></em>, <em class="sig-param"><span class="pre">activation:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">('relu'</span></em>, <em class="sig-param"><span class="pre">'sigmoid')</span></em>, <em class="sig-param"><span class="pre">lr:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">(1e-05</span></em>, <em class="sig-param"><span class="pre">0.001)</span></em>, <em class="sig-param"><span class="pre">optimizer:</span> <span class="pre">tensorflow.python.keras.optimizer_v2.optimizer_v2.OptimizerV2</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</span></em>, <em class="sig-param"><span class="pre">loss:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'categorical_crossentropy')</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'tensorflow.python.keras.engine.sequential.Sequential'&gt;</span></em>, <em class="sig-param"><span class="pre">&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.optimizer_v2.OptimizerV2'&gt;</span></em>, <em class="sig-param"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/hyperparametersDNN.html#create_random_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersDNN.create_random_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a deep neural network model with pseudo-random hyperparameters according to its arguments, each time it is called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m</strong> (<em>int</em>) – Number of input variables which will enter in the neural network</p></li>
+<li><p><strong>n_classes</strong> (<em>int</em>) – Number of classes to be classificated</p></li>
+<li><p><strong>metrics</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the metric to evaluate and compare the different random networks, defaults to “accuracy”</p></li>
+<li><p><strong>layers</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the number of layers of the neural network as hyperparameter, defaults to (1, 5)</p></li>
+<li><p><strong>n</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the min and max number of neurons per layer, defaults to (10,20)</p></li>
+<li><p><strong>activation</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the activation functions as hyperparameters, defaults to (“relu”,”sigmoid”)</p></li>
+<li><p><strong>lr</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the min and max values for the learning rate as hyperparameter, defaults to (1e-5, 1e-3)</p></li>
+<li><p><strong>optimizer</strong> (<em>keras.optimizers.Optimizer</em>) – A keras Optimizer to be used to train the neural network, defaults to keras.optimizers.Adam</p></li>
+<li><p><strong>loss</strong> (<em>str</em>) – String with the lossing function to be used to measure the error, defaults to “categorical_crossentropy”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple formed by the keras.models.Sequential, keras.optimizers.Optimizer, and the lossing function</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersDNN.get_hyperparams">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersDNN.</span></code><code class="sig-name descname"><span class="pre">get_hyperparams</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">model:</span> <span class="pre">tensorflow.python.keras.engine.sequential.Sequential)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'pandas.core.frame.DataFrame'&gt;</span></em>, <em class="sig-param"><span class="pre">&lt;class</span> <span class="pre">'pandas.core.frame.DataFrame'&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/hyperparametersDNN.html#get_hyperparams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersDNN.get_hyperparams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the hyperparams of the model passed as an argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>keras.models.Sequential</em>) – A keras.models.Sequential neural network model</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple with a pandas Dataframe with the hyperparameters of the neural network and a pandas Dataframe with the parameters of the optimezer used in the model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersDNN.optimize_DNN">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersDNN.</span></code><code class="sig-name descname"><span class="pre">optimize_DNN</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">X:</span> <span class="pre">numpy.ndarray</span></em>, <em class="sig-param"><span class="pre">t:</span> <span class="pre">numpy.ndarray</span></em>, <em class="sig-param"><span class="pre">kfolds:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10</span></em>, <em class="sig-param"><span class="pre">train_size:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.8</span></em>, <em class="sig-param"><span class="pre">trials:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">5</span></em>, <em class="sig-param"><span class="pre">epochs:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">50</span></em>, <em class="sig-param"><span class="pre">batch_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">40</span></em>, <em class="sig-param"><span class="pre">metrics:</span> <span class="pre">tuple</span> <span class="pre">=</span> <span class="pre">('accuracy'</span></em>, <em class="sig-param"><span class="pre">'Recall'</span></em>, <em class="sig-param"><span class="pre">&lt;function</span> <span class="pre">specificity&gt;</span></em>, <em class="sig-param"><span class="pre">'Precision'</span></em>, <em class="sig-param"><span class="pre">&lt;function</span> <span class="pre">f1_score&gt;</span></em>, <em class="sig-param"><span class="pre">'AUC')</span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="reference internal" href="_modules/models/hyperparametersDNN.html#optimize_DNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersDNN.optimize_DNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train the current model using cross validation and register its score comparing with new ones in each trial.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Characteristic matrix numpy array of the dataset which will be evaluated</p></li>
+<li><p><strong>t</strong> (<em>np.ndarray</em>) – Vector labels numpy array of the dataset which will be evaluated</p></li>
+<li><p><strong>kfolds</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of folds for the cross validation algorithm, defaults to 10</p></li>
+<li><p><strong>train_size</strong> (<em>float</em><em>, </em><em>optional</em>) – % of the data to be splitted into train and test values, defaults to 0.8</p></li>
+<li><p><strong>trials</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of trials used to generate random neural networks with different hyperparameters, defaults to 5</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of maximum iterations allow to converge the algorithm, defaults to 50</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of the batch used to calculate lossing function, defaults to 40</p></li>
+<li><p><strong>metrics</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the metrics to compare and evaluate the differene neural networks, defaults to (“accuracy”,”Recall”,cm.specificity,”Precision”,cm.f1_score,”AUC”)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple containing a tuple with the model and the history of the training, and another tuple with the X_test and t_test arrays to evaluate the model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.hyperparametersDNN.split_history_metrics">
+<code class="sig-prename descclassname"><span class="pre">models.hyperparametersDNN.</span></code><code class="sig-name descname"><span class="pre">split_history_metrics</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">historial</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="_modules/models/hyperparametersDNN.html#split_history_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.hyperparametersDNN.split_history_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform the given list which contains the history results to a dictionary with the metrics organized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>historial</strong> (<em>list</em>) – A list with the historical results of the trained model</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary with the metrics obtained from the trained model</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-models.customized_metrics"></span><p>Module to implement customized metrics for the neural networks.</p>
+<dl class="py function">
+<dt id="models.customized_metrics.f1_score">
+<code class="sig-prename descclassname"><span class="pre">models.customized_metrics.</span></code><code class="sig-name descname"><span class="pre">f1_score</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/models/customized_metrics.html#f1_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.customized_metrics.f1_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the f1_score metric to implement in keras models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_true</strong> (<em>np.ndarray</em>) – Numpy array containing the true values</p></li>
+<li><p><strong>y_pred</strong> (<em>np.ndarray</em>) – Numpy array containing the predicted values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A float number with the value of the metric calculated</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="models.customized_metrics.specificity">
+<code class="sig-prename descclassname"><span class="pre">models.customized_metrics.</span></code><code class="sig-name descname"><span class="pre">specificity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/models/customized_metrics.html#specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.customized_metrics.specificity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the specifity metric to implement in keras models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_true</strong> (<em>np.ndarray</em>) – Numpy array containing the true values</p></li>
+<li><p><strong>y_pred</strong> (<em>np.ndarray</em>) – Numpy array containing the predicted values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A float number with the value of the metric calculated</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="classes.html" class="btn btn-neutral float-left" title="Classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, David Adrian Rodriguez Garcia &amp; Victor Cainzos Lopez.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

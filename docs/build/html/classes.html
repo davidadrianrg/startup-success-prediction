@@ -1,0 +1,600 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Classes &mdash; startup-success-prediction  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Util Functions" href="util.html" />
+    <link rel="prev" title="Main program" href="app.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> startup-success-prediction
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="app.html">Main program</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">Util Functions</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">startup-success-prediction</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Classes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/classes.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-postprocessing.report">
+<span id="classes"></span><h1>Classes<a class="headerlink" href="#module-postprocessing.report" title="Permalink to this headline">¶</a></h1>
+<p>Postprocessing module to implement graph plot and file output.</p>
+<dl class="py class">
+<dt id="postprocessing.report.Report">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">postprocessing.report.</span></code><code class="sig-name descname"><span class="pre">Report</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_pdf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Markdown Wrapper Class to implement matplolib graphs and file output with markdown syntax.</p>
+<dl class="py method">
+<dt id="postprocessing.report.Report.parse_code">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">parse_code</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">codeblock</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'python'</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.parse_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.parse_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse code to Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>codeblock</strong> (<em>str</em>) – String input with the codeblock</p></li>
+<li><p><strong>language</strong> (<em>str</em><em>, </em><em>optional</em>) – Coding language to lint the code, defaults to “python”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String with the codeblock in markdown syntax</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.parse_dataframe">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">parse_dataframe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.parse_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.parse_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse dataframe to a markdown table showing the rows given by rows argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas dataframe to be parsed to markdown table</p></li>
+<li><p><strong>rows</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of rows to be parsed, defaults to 5</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Markdown table in string format</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.parse_image">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">parse_image</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.parse_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.parse_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse image to Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_path</strong> (<em>str</em>) – String with the filepath of the image</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the title of the image, defaults to “”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String with the image in markdown syntax</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.parse_list">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">parse_list</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">listmd</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unordered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.parse_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.parse_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse list to Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>listmd</strong> (<em>list</em>) – List with values to be printed</p></li>
+<li><p><strong>unordered</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the character of the ul element, defaults to “”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String with the list in markdown syntax</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.parse_noformat">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">parse_noformat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paragraph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.parse_noformat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.parse_noformat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse paragraph to avoid Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>paragraph</strong> (<em>str</em>) – String paragraph input</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String avoiding markdown syntax, returned as a plain textblock</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.parse_pdf">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">parse_pdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdstring</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.parse_pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.parse_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse Markdown string to avoid incompatibility syntax with md2pdf.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mdstring</strong> (<em>str</em>) – String input in markdown syntax</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String output with html &lt;pre&gt; tags</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[type]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.parse_title">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">parse_title</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.parse_title"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.parse_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse title to Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – String with the title</p></li>
+<li><p><strong>h</strong> (<em>int</em><em>, </em><em>optional</em>) – Number with the header level, defaults to 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>String with the title in markdown syntax</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print">
+<code class="sig-name descname"><span class="pre">print</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paragraph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print plain text to report file in Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>paragraph</strong> (<em>str</em>) – String paragraph to be printed in the report file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_boxplot">
+<code class="sig-name descname"><span class="pre">print_boxplot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'boxplot.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Box</span> <span class="pre">Plot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(15,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'green'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'v'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_scale</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_boxplot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_boxplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print to file the boxplot of the given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas Dataframe with data to be plotted</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – List containing the column tags to be plotted</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the filename of the output image, defaults to “boxplot.png”</p></li>
+<li><p><strong>img_title</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the title of the output image, defaults to “Box Plot”</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the image dimensions, defaults to (15, 7)</p></li>
+<li><p><strong>color</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the color of the boxplot, defaults to “green”</p></li>
+<li><p><strong>orient</strong> (<em>str</em><em>, </em><em>optional</em>) – String for the orientation of the boxplot, defaults to “v”</p></li>
+<li><p><strong>same_scale</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean to use the same scale for different boxes, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_clreport">
+<code class="sig-name descname"><span class="pre">print_clreport</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_test</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Classification</span> <span class="pre">report'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_clreport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_clreport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the classification report to the report file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_test</strong> (<em>np.ndarray</em>) – Numpy array with the t_test values</p></li>
+<li><p><strong>y_pred</strong> (<em>np.ndarray</em>) – Numpy array with the y predicted values</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – String title for the classification report, defaults to “Classification report”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_code">
+<code class="sig-name descname"><span class="pre">print_code</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">codeblock</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'python'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print code to report file in Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>codeblock</strong> (<em>str</em>) – String input with the codeblock</p></li>
+<li><p><strong>language</strong> (<em>str</em><em>, </em><em>optional</em>) – Coding language to lint the code, defaults to “python”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_confusion_matrix">
+<code class="sig-name descname"><span class="pre">print_confusion_matrix</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">sklearn.base.BaseEstimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X_test</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_test</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'confusion_matrix.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Confusion</span> <span class="pre">Matrix'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_dpi</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_confusion_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print confusion matrix plot of the given model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>BaseEstimator</em>) – Model which be used to print the confusion matrix</p></li>
+<li><p><strong>X_test</strong> (<em>np.ndarray</em>) – Numpy array with the X_test values</p></li>
+<li><p><strong>t_test</strong> (<em>np.ndarray</em>) – Numpy array with the t_test values</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em>) – String with the label of the x axe</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em>) – String with the label of the y axe</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the filename of the output image, defaults to “confusion_matrix.png”</p></li>
+<li><p><strong>img_title</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the title of the output image, defaults to “Confusion Matrix”</p></li>
+<li><p><strong>size_dpi</strong> (<em>int</em><em>, </em><em>optional</em>) – Number for the resolution dpi of the image, defaults to 100</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_confusion_matrix_DNN">
+<code class="sig-name descname"><span class="pre">print_confusion_matrix_DNN</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_test</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_confusion_matrix_DNN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_confusion_matrix_DNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print confusion matrix plot of the given DNN model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_test</strong> (<em>np.ndarray</em>) – Numpy array with the t_test values</p></li>
+<li><p><strong>y_pred</strong> (<em>np.ndarray</em>) – Numpy array with the y predicted values</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em>) – String with the label of the x axe</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em>) – String with the label of the y axe</p></li>
+<li><p><strong>title</strong> (<em>str</em>) – String with the title for the dataframe</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_dataframe">
+<code class="sig-name descname"><span class="pre">print_dataframe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rows</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the dataframe with the given rows to the report file.</p>
+<p>If the dataframe have more than 5 columns, will be divided to print in the report.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Pandas dataframe to be printed</p></li>
+<li><p><strong>rows</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of rows of the dataframe to be printed, defaults to 5</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_hpcontrast">
+<code class="sig-name descname"><span class="pre">print_hpcontrast</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_hpcontrast"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_hpcontrast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contrast the hypoteses of the scores given in the list and print the results in the report.</p>
+<p>Using Kurskal-Wallis and Tuckeyhsd tests.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>list</em>) – List containing the metric results of the models</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – List containg the models tags</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Number for the pValue of the test, defaults to 0.05</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_line">
+<code class="sig-name descname"><span class="pre">print_line</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print horizontal line to report file in Markdown syntax.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_mean_acc_model">
+<code class="sig-name descname"><span class="pre">print_mean_acc_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_models</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'mean_accuracy.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Mean</span> <span class="pre">Accuracy'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_mean_acc_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_mean_acc_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the mean accuracy of the model using its historial results to the report.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>best_models</strong> (<em>tuple</em>) – Tuple with the best models to print their mean accuracy curves</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – String with the tag of the model to be printed</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the filename of the output image, defaults to “mean_accuracy.png”</p></li>
+<li><p><strong>img_title</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the title of the output image, defaults to “Mean Accuracy”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_noformat">
+<code class="sig-name descname"><span class="pre">print_noformat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paragraph</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_noformat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_noformat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print plain text to report file escaping Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>paragraph</strong> (<em>str</em>) – String paragraph to be printed in the report file with no format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_roc_curve">
+<code class="sig-name descname"><span class="pre">print_roc_curve</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_test</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_score</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'roc_curve.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Roc</span> <span class="pre">Curve</span> <span class="pre">per</span> <span class="pre">class'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(10,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'False</span> <span class="pre">Positive</span> <span class="pre">Rate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'True</span> <span class="pre">Positive</span> <span class="pre">Rate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'lower</span> <span class="pre">right'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_roc_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_roc_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print roc curves for any labels of the given model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_test</strong> (<em>np.ndarray</em>) – Numpy array with the t_test values</p></li>
+<li><p><strong>y_score</strong> – Numpy array with the y score values</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the filename of the output image, defaults to “roc_curve.png”</p></li>
+<li><p><strong>img_title</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the title of the output image, defaults to “Roc Curve per class”</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the image dimensions, defaults to (10, 8)</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em>) – String with the label of the x axe</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em>) – String with the label of the y axe</p></li>
+<li><p><strong>legend_loc</strong> (<em>str</em>) – String with the position of the legend in the figure</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_title">
+<code class="sig-name descname"><span class="pre">print_title</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_title"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print title to report file in Markdown syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>title</strong> (<em>str</em>) – String title to be printed</p></li>
+<li><p><strong>h</strong> (<em>int</em><em>, </em><em>optional</em>) – Number with the header level, defaults to 1</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_val_curve_dnn">
+<code class="sig-name descname"><span class="pre">print_val_curve_dnn</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">best_DNN</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'accuracy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'validation_curve_dnn.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Validation</span> <span class="pre">Curve'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_val_curve_dnn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_val_curve_dnn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the validation curve of the model using its historial results to the report.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>best_DNN</strong> (<em>tuple</em>) – Tuple with the best models to print their validation curves</p></li>
+<li><p><strong>metric</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the metric used to perform the validation curve, defaults to “accuracy”</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the filename of the output image, defaults to “validation_curve_dnn.png”</p></li>
+<li><p><strong>img_title</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the title of the output image, defaults to “Validation Curve”</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.print_validation_curve">
+<code class="sig-name descname"><span class="pre">print_validation_curve</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">sklearn.base.BaseEstimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([1.00000000e-06,</span> <span class="pre">1.77827941e-05,</span> <span class="pre">3.16227766e-04,</span> <span class="pre">5.62341325e-03,</span> <span class="pre">1.00000000e-01])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Score'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'validation_curve.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'Validation</span> <span class="pre">Curve'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(10,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.print_validation_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.print_validation_curve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print validation curve plot of the given model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>BaseEstimator</em>) – Model which be used to plot the validation curve</p></li>
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Numpy array with the characteristic matrix</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Numpy array with the predicted values</p></li>
+<li><p><strong>param_name</strong> (<em>str</em>) – String with the name of the hyperparameter</p></li>
+<li><p><strong>param_range</strong> (<em>range</em><em>, </em><em>optional</em>) – Logarithmic range for the hyperparameter values, defaults to np.logspace(-6, -1, 5)</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the label for the y axe, defaults to “Score”</p></li>
+<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the filename of the output image, defaults to “validation_curve.png”</p></li>
+<li><p><strong>img_title</strong> (<em>str</em><em>, </em><em>optional</em>) – String with the title of the output image, defaults to “Validation Curve”</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Tuple with the image dimensions, defaults to (10, 8)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="postprocessing.report.Report.save_image">
+<code class="sig-name descname"><span class="pre">save_image</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">matplotlib.figure.Figure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/postprocessing/report.html#Report.save_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#postprocessing.report.Report.save_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Image saving method to file and report.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figure</strong> (<em>plt.Figure</em>) – Matplotlib figure to be printed in the report file</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – String with the filename of the output image</p></li>
+<li><p><strong>img_title</strong> (<em>str</em>) – String with the title of the output image</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="util.html" class="btn btn-neutral float-right" title="Util Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="app.html" class="btn btn-neutral float-left" title="Main program" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, David Adrian Rodriguez Garcia &amp; Victor Cainzos Lopez.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
