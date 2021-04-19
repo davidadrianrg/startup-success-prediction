@@ -71,9 +71,9 @@ For more information check [keras](https://www.tutorialspoint.com/keras/keras_in
 ### Recommended
 In order to take advantage of total functionalities of the program generation files:
 
-- md2pdf Client
+- md2pdf
 ```bash
-pip install md2pdf-client
+pip install md2pdf
 ```
 More information here [md2pdf Client](https://pypi.org/project/md2pdf-client/).
 
