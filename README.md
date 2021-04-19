@@ -75,7 +75,7 @@ In order to take advantage of total functionalities of the program generation fi
 ```bash
 pip install md2pdf
 ```
-More information here [md2pdf Client](https://pypi.org/project/md2pdf-client/).
+More information here [md2pdf](https://github.com/jmaupetit/md2pdf).
 
 ### Running
 Having followed the previous installation steps, it is time to clone the [github repository](https://github.com/davidadrianrg/startup-success-prediction):
