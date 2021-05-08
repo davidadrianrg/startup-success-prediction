@@ -16,6 +16,8 @@ from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
+from models import multithreading as mth
+
 
 def select_models(LR: bool = True, LDA: bool = True, KNN: bool = True, SVC: bool = True) -> list:
     """Create a list which contains the tags of the models that are going to be tested for the best.
@@ -295,3 +297,73 @@ def optimizing_models(
             macro_model.steps[1][1],
         )
     return best_models
+
+def optimizing_models_multithread(
+    models: list,
+    X: np.ndarray,
+    t: np.ndarray,
+    train_size: float = 0.85,
+    scoring: dict = {
+        "accuracy": "accuracy",
+        "recall": "recall",
+        "specificity": make_scorer(recall_score, pos_label=0),
+        "precision": "precision",
+        "f1": "f1",
+        "roc_auc": "roc_auc",
+    },
+    cv: int = 10,
+    trials: int = 25,
+) -> dict:
+    """Optimize hyperparameters of the given model and returns the best of them using cross validation and multithreading.
+
+    :param models: List with the selected model to be evaluated.
+    :type models: list
+    :param X: Characteristic matrix numpy array of the dataset which will be evaluated
+    :type X: np.ndarray
+    :param t: Vector labels numpy array of the dataset which will be evaluated
+    :type t: np.ndarray
+    :param train_size: % of the data to be splitted into train and test values, defaults to 0.85
+    :type train_size: float, optional
+    :param scoring: A dictionary with the wanted metrics to compare and evaluate the different models, defaults to { "accuracy": "accuracy", "recall": "recall", "specificity": make_scorer(recall_score, pos_label=0), "precision": "precision", "f1": "f1", "roc_auc": "roc_auc", }
+    :type scoring: dict, optional
+    :param cv: Number of folds for the cross validation algorithm, defaults to 10
+    :type cv: int, optional
+    :param trials: Number of trials used to generate random models with different hyperparameters, defaults to 25
+    :type trials: int, optional
+    :return: A dictionary with the scores and models trained using cross validation
+    :rtype: dict
+    """
+    if "accuracy" not in scoring:
+        scoring["accuracy"] = "accuracy"
+
+    best_models = dict()
+    X_train, _, t_train, _ = train_test_split(X, t, train_size=train_size)
+    threads_dict = {}
+    for tag in models:
+        last_accuracy = 0
+        print(f"\n***Optimizing {tag} hyperparameters***")
+        threads_dict[tag] = []
+        for _ in range(trials):
+            current_model = random_model(tag)
+            macro_model = build_macro_model(current_model)
+            model_thread = mth.ModelThread(X_train, t_train, macro_model, cv, scoring) 
+            model_thread.start()
+            threads_dict[tag].append(model_thread)
+    
+    for tag in models:
+        for thread in threads_dict[tag]:
+            thread.join()
+            mean_accuracy = np.mean(thread.scores["test_accuracy"])
+            if mean_accuracy > last_accuracy:
+                best_models[tag] = (thread.scores, thread.macro_model)
+                last_accuracy = mean_accuracy
+                print("\nBest accuracy so far: ", last_accuracy)
+            print(".", end="")
+        print(
+            "\nScore:",
+            round(np.mean(last_accuracy), 4),
+            "-",
+            macro_model.steps[1][1],
+        )
+    return best_models
+

@@ -133,13 +133,18 @@ def train_models(X: np.ndarray, t: np.ndarray) -> tuple:
     """
     # Wrapper function of optimize_models and optimize_DNN functions in hyperparameters modules
 
-    # Ask user for the training trials, epochs and folds
+    # Ask user for the training trials, epochs, folds and if using multithreading
     trials = int(input("Introduce el número de intentos aleatorios en la generación de los modelos: "))
     epochs = int(input("Introduce el número de iteraciones máximo: "))
     cv = int(input("Introduce el número de folds para la validación cruzada: "))
+    is_mthreading = input("¿Deseas utilizar procesado multihilo para el entrenamiento?(s/n): ")
+    if is_mthreading.lower() == "s":
+        is_mthreading = True
+    else:
+        is_mthreading = False
     # Return a tuple with a dict with the best models validated and the train size and the best DNN model
     # Using the hyperperameters ranges given in the arguments
-    best_models, best_DNN = mdleval.get_best_models(X, t, cv=cv, trials=trials, epochs=epochs)
+    best_models, best_DNN = mdleval.get_best_models(X, t, cv=cv, trials=trials, epochs=epochs, is_mthreading=is_mthreading)
 
     # Return a dataframe with validation results of the models in visutalization mode.
     results = mdleval.get_results(best_models, best_DNN)
