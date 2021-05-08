@@ -38,6 +38,7 @@ def get_best_models(
         cm.f1_score,
         "AUC",
     ),
+    is_mthreading: bool = False,
 ) -> tuple:
     """Return the best models generated with random hyperparameters using the arguments as training hyperparameters.
 
@@ -61,28 +62,51 @@ def get_best_models(
     :type batch_size: int, optional
     :param metrics: Tuple with the metrics to compare and evaluate the differene neural networks, defaults to ( "accuracy", "Recall", cm.specificity, "Precision", cm.f1_score, "AUC", )
     :type metrics: tuple, optional
+    :param is_mthreading: Boolean to enable/disable multithreading during the training of the models, defaults to False.
+    :type is_mthreading: bool, optional
     :return: A tuple containing a tuple with the best_models and train_size and a tuple with the bestDNN model
     :rtype: tuple
     """
-    best_models = hpTune.optimizing_models(
-        models,
-        X,
-        t,
-        cv=cv,
-        train_size=train_size,
-        scoring=scoring,
-        trials=trials,
-    )
-    best_DNN = hpDNN.optimize_DNN(
-        X,
-        t,
-        kfolds=cv,
-        train_size=train_size,
-        trials=trials,
-        epochs=epochs,
-        batch_size=batch_size,
-        metrics=metrics,
-    )
+    if is_mthreading:
+        best_models = hpTune.optimizing_models_multithread(
+            models,
+            X,
+            t,
+            cv=cv,
+            train_size=train_size,
+            scoring=scoring,
+            trials=trials,
+        )
+        best_DNN = hpDNN.optimize_DNN_multithread(
+            X,
+            t,
+            kfolds=cv,
+            train_size=train_size,
+            trials=trials,
+            epochs=epochs,
+            batch_size=batch_size,
+            metrics=metrics,
+        )
+    else:
+        best_models = hpTune.optimizing_models(
+            models,
+            X,
+            t,
+            cv=cv,
+            train_size=train_size,
+            scoring=scoring,
+            trials=trials,
+        )
+        best_DNN = hpDNN.optimize_DNN(
+            X,
+            t,
+            kfolds=cv,
+            train_size=train_size,
+            trials=trials,
+            epochs=epochs,
+            batch_size=batch_size,
+            metrics=metrics,
+        )
     return (best_models, train_size), best_DNN
 
 
