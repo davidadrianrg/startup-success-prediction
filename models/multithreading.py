@@ -20,7 +20,6 @@ class ModelThread(Thread):
         self.cv_multithread_model()
 
     def cv_multithread_model(self):
-        # Using n_jobs = -1 will use all the cores available in a multithreading process
         self.scores = cross_validate(
                 self.model,
                 self.X_train,
@@ -28,7 +27,6 @@ class ModelThread(Thread):
                 cv=self.cv,
                 scoring=self.scoring,
                 return_train_score=True,
-                n_jobs=-1,
             )
 
 class DnnThread(Thread):

@@ -287,6 +287,7 @@ def optimize_DNN_multithread(
         # Lists to store historical data and means per fold
         historial = []
         mean_folds = []
+        print(f"\n***Trial {row+1} results***",end="\n\n")
         for thread in threads_dict[row]:
             thread.join()
             historial.append(thread.history.history)
