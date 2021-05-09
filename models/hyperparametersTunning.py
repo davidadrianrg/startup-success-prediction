@@ -340,30 +340,30 @@ def optimizing_models_multithread(
     X_train, _, t_train, _ = train_test_split(X, t, train_size=train_size)
     threads_dict = {}
     for tag in models:
-        last_accuracy = 0
         print(f"\n***Optimizing {tag} hyperparameters***")
         threads_dict[tag] = []
         for _ in range(trials):
             current_model = random_model(tag)
             macro_model = build_macro_model(current_model)
-            model_thread = mth.ModelThread(X_train, t_train, macro_model, cv, scoring) 
+            model_thread = mth.ModelThread(X_train, np.ravel(t_train), macro_model, cv, scoring) 
             model_thread.start()
             threads_dict[tag].append(model_thread)
     
     for tag in models:
+        last_accuracy = 0
+        print(f"\n***Cross validation results for {tag}***")
         for thread in threads_dict[tag]:
             thread.join()
             mean_accuracy = np.mean(thread.scores["test_accuracy"])
             if mean_accuracy > last_accuracy:
-                best_models[tag] = (thread.scores, thread.macro_model)
+                best_models[tag] = (thread.scores, thread.model)
                 last_accuracy = mean_accuracy
                 print("\nBest accuracy so far: ", last_accuracy)
-            print(".", end="")
         print(
             "\nScore:",
             round(np.mean(last_accuracy), 4),
             "-",
-            macro_model.steps[1][1],
+            best_models[tag][1].steps[1][1],
         )
     return best_models
 
