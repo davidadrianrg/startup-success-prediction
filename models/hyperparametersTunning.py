@@ -26,9 +26,7 @@ class HpModels:
         self.threads_dict = dict()
 
     @staticmethod
-    def select_models(
-        LR: bool = True, LDA: bool = True, KNN: bool = True, SVC: bool = True
-    ) -> list:
+    def select_models(LR: bool = True, LDA: bool = True, KNN: bool = True, SVC: bool = True) -> list:
         """Create a list which contains the tags of the models that are going to be tested for the best.
 
         :param LR: If True, appends the Logistic Regression model tag, defaults to True
@@ -103,9 +101,7 @@ class HpModels:
         model = LinearDiscriminantAnalysis(
             solver=random.choice(solver),
             shrinkage=random.choice(shrinkage),
-            tol=round(
-                loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))
-            ),
+            tol=round(loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))),
         )
         return model
 
@@ -208,9 +204,7 @@ class HpModels:
         return pd.DataFrame.from_records([hp], index=["hyperparams"])
 
     @staticmethod
-    def build_macro_model(
-        model: BaseEstimator, scaler: TransformerMixin = StandardScaler()
-    ) -> Pipeline:
+    def build_macro_model(model: BaseEstimator, scaler: TransformerMixin = StandardScaler()) -> Pipeline:
         """Create a macro model pipeline using the given scaler.
 
         :param model: A model to use in the macro model pipeline
@@ -233,13 +227,13 @@ class HpModels:
         :rtype: BaseEstimator
         """
         if tag == "LR":
-            model = create_random_LR()
+            model = HpModels.create_random_LR()
         if tag == "LDA":
-            model = create_random_LDA()
+            model = HpModels.create_random_LDA()
         if tag == "KNN":
-            model = create_random_KNN()
+            model = HpModels.create_random_KNN()
         if tag == "SVC":
-            model = create_random_SVC()
+            model = HpModels.create_random_SVC()
         return model
 
     def perform_optimizing_model(
@@ -278,7 +272,6 @@ class HpModels:
         :return: A dictionary with the scores and models trained using cross validation
         :rtype: dict
         """
-
         if "accuracy" not in scoring:
             scoring["accuracy"] = "accuracy"
 
@@ -287,8 +280,8 @@ class HpModels:
         last_accuracy = 0
         print(f"\n***Optimizing {tag} hyperparameters***")
         for _ in range(trials):
-            current_model = random_model(tag)
-            macro_model = build_macro_model(current_model)
+            current_model = HpModels.random_model(tag)
+            macro_model = HpModels.build_macro_model(current_model)
             scores = cross_validate(
                 macro_model,
                 X_train,
@@ -314,13 +307,9 @@ class HpModels:
 
         time_models = dict()
         for tag in models:
-            time_models[tag] = round(
-                timeit("perform_optimizing_model(tag, *args, **kwargs)"), 4
-            )
+            time_models[tag] = round(timeit("perform_optimizing_model(tag, *args, **kwargs)"), 4)
 
-        return self.best_models, pd.DataFrame(
-            time_models, index=["Time Models"]
-        )
+        return self.best_models, pd.DataFrame(time_models, index=["Time Models"])
 
     def perform_optimizing_models_multithread(
         self,
@@ -366,11 +355,9 @@ class HpModels:
         print(f"\n***Optimizing {tag} hyperparameters***")
         self.threads_dict[tag] = []
         for _ in range(trials):
-            current_model = random_model(tag)
-            macro_model = build_macro_model(current_model)
-            model_thread = mth.ModelThread(
-                X_train, np.ravel(t_train), macro_model, cv, scoring
-            )
+            current_model = HpModels.random_model(tag)
+            macro_model = HpModels.build_macro_model(current_model)
+            model_thread = mth.ModelThread(X_train, np.ravel(t_train), macro_model, cv, scoring)
             model_thread.start()
             self.threads_dict[tag].append(model_thread)
 
@@ -394,12 +381,6 @@ class HpModels:
 
         time_models = dict()
         for tag in models:
-            time_models[tag] = round(
-                timeit(
-                    "perform_optimizing_models_multithread(tag, *args, **kwargs)"
-                )
-            )
+            time_models[tag] = round(timeit("self.perform_optimizing_models_multithread(tag, *args, **kwargs)"))
 
-        return self.best_models, pd.DataFrame(
-            time_models, index=["Time Models"]
-        )
+        return self.best_models, pd.DataFrame(time_models, index=["Time Models"])

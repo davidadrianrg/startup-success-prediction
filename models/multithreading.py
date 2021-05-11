@@ -3,6 +3,7 @@
 from threading import Thread
 from sklearn.model_selection import cross_validate
 
+
 class ModelThread(Thread):
     """Thread class to implement the training model using cross validation."""
 
@@ -15,19 +16,19 @@ class ModelThread(Thread):
         self.scoring = scoring
         self.scores = None
 
-    
     def run(self):
         self.cv_multithread_model()
 
     def cv_multithread_model(self):
         self.scores = cross_validate(
-                self.model,
-                self.X_train,
-                self.t_train,
-                cv=self.cv,
-                scoring=self.scoring,
-                return_train_score=True,
-            )
+            self.model,
+            self.X_train,
+            self.t_train,
+            cv=self.cv,
+            scoring=self.scoring,
+            return_train_score=True,
+        )
+
 
 class DnnThread(Thread):
     """Thread class to implement the training dnn fitting."""
@@ -43,7 +44,6 @@ class DnnThread(Thread):
         self.batch_size = batch_size
         self.history = None
 
-    
     def run(self):
         self.fit_dnn()
 
