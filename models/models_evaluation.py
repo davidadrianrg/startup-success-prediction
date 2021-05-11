@@ -9,14 +9,14 @@ from sklearn.base import BaseEstimator
 from tensorflow.keras.models import Sequential
 
 from models import customized_metrics as cm
-from models import hyperparametersDNN as hpDNN
-from models import hyperparametersTunning as hpTune
+from models.hyperparametersDNN import HpDNN
+from models.hyperparametersTunning import HpModels
 
 
 def get_best_models(
     X: np.ndarray,
     t: np.ndarray,
-    models: list = hpTune.select_models(),
+    models: list = HpModels.select_models(),
     cv: int = 10,
     train_size: float = 0.8,
     scoring: dict = {
@@ -46,7 +46,7 @@ def get_best_models(
     :type X: np.ndarray
     :param t: Vector labels numpy array of the dataset which will be evaluated
     :type t: np.ndarray
-    :param models: List with the selected model tags, defaults to hpTune.select_models()
+    :param models: List with the selected model tags, defaults to HpModels.select_models()
     :type models: list, optional
     :param cv: Number of folds for the cross validation algorithm, defaults to 10
     :type cv: int, optional
@@ -68,7 +68,7 @@ def get_best_models(
     :rtype: tuple
     """
     if is_mthreading:
-        best_models = hpTune.optimizing_models_multithread(
+        best_models = HpModels.optimizing_models_multithread(
             models,
             X,
             t,
@@ -77,7 +77,7 @@ def get_best_models(
             scoring=scoring,
             trials=trials,
         )
-        best_DNN = hpDNN.optimize_DNN_multithread(
+        best_DNN = HpDNN.optimize_DNN_multithread(
             X,
             t,
             kfolds=cv,
@@ -88,7 +88,7 @@ def get_best_models(
             metrics=metrics,
         )
     else:
-        best_models = hpTune.optimizing_models(
+        best_models = HpModels.optimizing_models(
             models,
             X,
             t,
@@ -97,7 +97,7 @@ def get_best_models(
             scoring=scoring,
             trials=trials,
         )
-        best_DNN = hpDNN.optimize_DNN(
+        best_DNN = HpDNN.optimize_DNN(
             X,
             t,
             kfolds=cv,
@@ -206,10 +206,10 @@ def get_hyperparams(model: BaseEstimator, tag: str) -> pd.DataFrame:
     :return: A pandas DataFrame with the hyperparameters used in the given model.
     :rtype: pd.DataFrame
     """
-    return hpTune.get_hyperparameters(model, tag)
+    return HpModels.get_hyperparameters(model, tag)
 
 
-def get_hyperparams_DNN(model: Sequential) -> (pd.DataFrame, pd.DataFrame):
+def get_hyperparams_DNN(model: Sequential) -> tuple((pd.DataFrame, pd.DataFrame)):
     """Wrapp the get_hyperparams function in hyperparametersDNN module.
 
     Return the hyperparams of the model passed as an argument.
@@ -219,4 +219,4 @@ def get_hyperparams_DNN(model: Sequential) -> (pd.DataFrame, pd.DataFrame):
     :return: A tuple with a pandas Dataframe with the hyperparameters of the neural network and a pandas Dataframe with the parameters of the optimezer used in the model
     :rtype: tuple
     """
-    return hpDNN.get_hyperparams(model)
+    return HpDNN.get_hyperparams(model)

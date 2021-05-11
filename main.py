@@ -144,7 +144,9 @@ def train_models(X: np.ndarray, t: np.ndarray) -> tuple:
         is_mthreading = False
     # Return a tuple with a dict with the best models validated and the train size and the best DNN model
     # Using the hyperperameters ranges given in the arguments
-    best_models, best_DNN = mdleval.get_best_models(X, t, cv=cv, trials=trials, epochs=epochs, is_mthreading=is_mthreading)
+    best_models, best_DNN = mdleval.get_best_models(
+        X, t, cv=cv, trials=trials, epochs=epochs, is_mthreading=is_mthreading
+    )
 
     # Return a dataframe with validation results of the models in visutalization mode.
     results = mdleval.get_results(best_models, best_DNN)
@@ -189,6 +191,9 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         # Generating the header
         report.print_title("Startup Success Prediction Model")
         report.print_title("David Adrián Rodríguez García & Víctor Caínzos López", 2)
+        report.print_line()
+        # Generating the chapter Unsupervised Classification Study
+        report.print_title("Supervised Classification Study", 2)
         report.print_line()
 
         # Generating preprocessing report chapter
@@ -325,6 +330,10 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         dfparams, dfcomp = mdleval.get_hyperparams_DNN(best_DNN[0][0])
         report.print_dataframe(dfparams)
         report.print_dataframe(dfcomp)
+
+        # Generating the chapter Unsupervised Classification Study
+        report.print_title("Unsupervised Classification Study", 2)
+        report.print_line()
 
 
 if __name__ == "__main__":
