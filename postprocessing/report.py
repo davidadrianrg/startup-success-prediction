@@ -757,7 +757,7 @@ class Report:
         :param img_title: String with the title of the output image, defaults to "Autoencoder Threshold"
         :type img_title: str, optional
         """
-        self.save_image(Anomalies.plot_autoencoder_error(**kwargs), filename, img_title)
+        self.save_image(anomalies.plot_autoencoder_error(**kwargs), filename, img_title)
 
     def print_PCA(
         self,

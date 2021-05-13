@@ -13,6 +13,9 @@ import pandas as pd
 from models import models_evaluation as mdleval
 from postprocessing.report import Report
 from preprocessing import preprocessing as prp
+from preprocessing.Dimension import Dimension
+from preprocessing.Clustering import Clustering
+from preprocessing.detect_anomalies import Anomalies
 
 
 def make_preprocessing(filepath: str) -> pd.DataFrame:
@@ -128,15 +131,17 @@ def train_models(X: np.ndarray, t: np.ndarray) -> tuple:
     :type X: numpy.ndarray
     :param t: Label values for the exit of the dataset
     :type t: numpy.ndarray
-    :return: A tuple containing the results of the training, and the best_models and best_DNN tuples of the models
+    :return: A tuple containing the results of the training, and the best_models and best_DNN tuples of the models and the log for the training times
     :rtype: tuple
     """
     # Wrapper function of optimize_models and optimize_DNN functions in hyperparameters modules
 
     # Ask user for the training trials, epochs, folds and if using multithreading
+    global epochs
     trials = int(input("Introduce el número de intentos aleatorios en la generación de los modelos: "))
     epochs = int(input("Introduce el número de iteraciones máximo: "))
     cv = int(input("Introduce el número de folds para la validación cruzada: "))
+    global is_mthreading
     is_mthreading = input("¿Deseas utilizar procesado multihilo para el entrenamiento?(s/n): ")
     if is_mthreading.lower() == "s":
         is_mthreading = True
@@ -144,17 +149,19 @@ def train_models(X: np.ndarray, t: np.ndarray) -> tuple:
         is_mthreading = False
     # Return a tuple with a dict with the best models validated and the train size and the best DNN model
     # Using the hyperperameters ranges given in the arguments
-    best_models, best_DNN = mdleval.get_best_models(
+    best_models, best_DNN, time_log = mdleval.get_best_models(
         X, t, cv=cv, trials=trials, epochs=epochs, is_mthreading=is_mthreading
     )
 
     # Return a dataframe with validation results of the models in visutalization mode.
     results = mdleval.get_results(best_models, best_DNN)
 
-    return results, best_models, best_DNN
+    return results, best_models, best_DNN, time_log
 
 
-def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_models: tuple, best_DNN: tuple):
+def make_report(
+    df_dict: dict, features_list: list, results: pd.DataFrame, best_models: tuple, best_DNN: tuple, time_log: tuple
+):
     """Generate a report taking into account the given data.
 
     :param df_dict: Dictionary with pandas Dataframes to be included in the report
@@ -167,6 +174,8 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
     :type best_models: tuple
     :param best_DNN: Tuple containing the neural network trained
     :type best_DNN: tuple
+    :param time_log: Tuple containing the times registered during the training of the models and dnn
+    :type time_log:tuple
     """
     # Processing the data to be passed to the Report class in the right format
     results_tags = []
@@ -193,7 +202,7 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         report.print_title("David Adrián Rodríguez García & Víctor Caínzos López", 2)
         report.print_line()
         # Generating the chapter Unsupervised Classification Study
-        report.print_title("Supervised Classification Study", 2)
+        report.print_title("Clasificación supervisada", 2)
         report.print_line()
 
         # Generating preprocessing report chapter
@@ -332,8 +341,40 @@ def make_report(df_dict: dict, features_list: list, results: pd.DataFrame, best_
         report.print_dataframe(dfcomp)
 
         # Generating the chapter Unsupervised Classification Study
-        report.print_title("Unsupervised Classification Study", 2)
+        report.print_title("Clasificación No Supervisada", 2)
         report.print_line()
+        report.print_title("Reducción de la dimensionalidad", 4)
+        report.print_PCA(df_dict["X"], Dimension.get_PCA(df_dict("X")))
+        report.print_title("Clustering", 4)
+        report.print_title("K-means clustering", 5)
+        report.print_kmeans(Clustering.perform_kmeans(df_dict["X"]), df_dict["X"])
+        report.print_title("DBSCAN clustering", 5)
+        report.print_dbscan(Clustering.perform_DBSCAN(df_dict["X"]))
+        report.print_title("Detección de anomalías", 4)
+        report.print_title("Isolation Forest", 5)
+        anomalies = Anomalies(df_dict["X"], df_dict["t"], train_size=2, anomalies_size=0.5)
+        report.print_noformat(anomalies.perform_IsolationForest())
+        report.print_title("Local Oulier Factor (LOF)", 5)
+        report.print_noformat(anomalies.perform_LOF())
+        report.print_title("Autoencoding", 5)
+        report.print_line()
+        anomalies.perform_autoencoding()
+        anomalies.train_autoencoding(epochs=epochs)
+        report.print_autoencoder_validation(anomalies)
+        report.print_autoencoder_threshold(anomalies)
+        report.print_autoencoder_error(anomalies)
+
+        # Generating the chapter Time log
+        report.print_title("Registro de tiempos de entrenamiento", 2)
+        report.print_line()
+        if is_mthreading:
+            report.print("El entrenamiento se ha realizado en computación multihilo")
+        else:
+            report.print("El entrenamiento se ha realizado en computación secuencial")
+        report.print_title("Tiempos del entrenamiento de los modelos de clasificación supervisada", 4)
+        report.print_dataframe(time_log[0])
+        report.print_title("Tiempos del entrenamiento del modelo de red neuronal en clasificación supervisada", 4)
+        report.print_dataframe(time_log[1])
 
 
 if __name__ == "__main__":
