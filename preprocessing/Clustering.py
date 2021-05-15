@@ -8,8 +8,17 @@ from sklearn.neighbors import NearestNeighbors
 
 
 class Clustering:
+    """Class with clustering techniques implemented for unsupervised learning"""
+
     @staticmethod
     def perform_kmeans(X: pd.DataFrame, **kwargs):
+        """Static method wrapped in Clustering class which performs Kmeans algorithm
+
+        :param X: Dataset with samples
+        :type X: pd.DataFrame
+        :return: Inertias from data samples to clusters
+        :rtype: dict
+        """
         k_list = np.arange(1, len(X.columns) + 1)
         inertia_dic = {}
         for k in k_list:
@@ -19,6 +28,13 @@ class Clustering:
 
     @staticmethod
     def perform_DBSCAN(X: pd.DataFrame, **kwargs):
+        """Static method wrapped in Clustering class which performs
+
+        :param X: Dataset with samples
+        :type X: pd.DataFrame
+        :return: Distances for all data to its k-nearest-neighbor
+        :rtype: list
+        """
         neighbors = NearestNeighbors(n_neighbors=2 * len(X.columns))
         neighbors_fit = neighbors.fit(X)
         distances, _ = neighbors_fit.kneighbors(X)
