@@ -17,7 +17,21 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
 from models import multithreading as mth
-import timeit
+import logging
+import time
+
+from functools import wraps
+
+logger = logging.getLogger(__name__)
+
+
+# Misc logger setup so a debug log statement gets printed on stdout.
+logger.setLevel("DEBUG")
+handler = logging.StreamHandler()
+log_format = "%(asctime)s %(levelname)s -- %(message)s"
+formatter = logging.Formatter(log_format)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 class HpModels:
@@ -25,8 +39,27 @@ class HpModels:
         self.best_models = dict()
         self.threads_dict = dict()
 
+    def timed(func):
+        """This decorator prints the execution time for the decorated function."""
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start = time.time()
+            result = func(*args, **kwargs)
+            end = time.time()
+            logger.debug(
+                "{} for {} ran in {}s".format(
+                    func.__name__, args[1], round(end - start, 2)
+                )
+            )
+            return round(end - start, 2)
+
+        return wrapper
+
     @staticmethod
-    def select_models(LR: bool = True, LDA: bool = True, KNN: bool = True, SVC: bool = True) -> list:
+    def select_models(
+        LR: bool = True, LDA: bool = True, KNN: bool = True, SVC: bool = True
+    ) -> list:
         """Create a list which contains the tags of the models that are going to be tested for the best.
 
         :param LR: If True, appends the Logistic Regression model tag, defaults to True
@@ -101,7 +134,9 @@ class HpModels:
         model = LinearDiscriminantAnalysis(
             solver=random.choice(solver),
             shrinkage=random.choice(shrinkage),
-            tol=round(loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))),
+            tol=round(
+                loguniform.rvs(tol[0], tol[1]), int(abs(math.log(tol[0], 10)))
+            ),
         )
         return model
 
@@ -204,7 +239,9 @@ class HpModels:
         return pd.DataFrame.from_records([hp], index=["hyperparams"])
 
     @staticmethod
-    def build_macro_model(model: BaseEstimator, scaler: TransformerMixin = StandardScaler()) -> Pipeline:
+    def build_macro_model(
+        model: BaseEstimator, scaler: TransformerMixin = StandardScaler()
+    ) -> Pipeline:
         """Create a macro model pipeline using the given scaler.
 
         :param model: A model to use in the macro model pipeline
@@ -236,6 +273,7 @@ class HpModels:
             model = HpModels.create_random_SVC()
         return model
 
+    @timed
     def perform_optimizing_model(
         self,
         tag,
@@ -307,10 +345,14 @@ class HpModels:
 
         time_models = dict()
         for tag in models:
-            time_models[tag] = round(timeit("perform_optimizing_model(tag, *args, **kwargs)"), 4)
+            time_models[tag] = self.perform_optimizing_model(
+                tag, *args, **kwargs
+            )
+        return self.best_models, pd.DataFrame(
+            time_models, index=["Time Models"]
+        )
 
-        return self.best_models, pd.DataFrame(time_models, index=["Time Models"])
-
+    @timed
     def perform_optimizing_models_multithread(
         self,
         tag,
@@ -357,7 +399,9 @@ class HpModels:
         for _ in range(trials):
             current_model = HpModels.random_model(tag)
             macro_model = HpModels.build_macro_model(current_model)
-            model_thread = mth.ModelThread(X_train, np.ravel(t_train), macro_model, cv, scoring)
+            model_thread = mth.ModelThread(
+                X_train, np.ravel(t_train), macro_model, cv, scoring
+            )
             model_thread.start()
             self.threads_dict[tag].append(model_thread)
 
@@ -365,22 +409,36 @@ class HpModels:
         print(f"\n***Cross validation results for {tag}***")
         for thread in self.threads_dict[tag]:
             thread.join()
-            mean_accuracy = np.mean(thread.scores["test_accuracy"])
-            if mean_accuracy > last_accuracy:
-                self.best_models[tag] = (thread.scores, thread.model)
-                last_accuracy = mean_accuracy
-                print("\nBest accuracy so far: ", last_accuracy)
-        print(
-            "\nScore:",
-            round(np.mean(last_accuracy), 4),
-            "-",
-            self.best_models[tag][1].steps[1][1],
-        )
+            try:
+                mean_accuracy = np.mean(thread.scores["test_accuracy"])
+                if mean_accuracy > last_accuracy:
+                    self.best_models[tag] = (thread.scores, thread.model)
+                    last_accuracy = mean_accuracy
+                    print("\nBest accuracy so far: ", last_accuracy)
+            except:
+                raise Exception(
+                    f"No solution valid for {tag}. Increase number of trials or kfolds."
+                )
+        try:
+            print(
+                "\nScore:",
+                round(np.mean(last_accuracy), 4),
+                "-",
+                self.best_models[tag][1].steps[1][1],
+            )
+        except:
+            raise Exception(
+                f"No solution valid for {tag}. Increase number of trials or kfolds."
+            )
 
     def optimizing_models_multithread(self, models: list, *args, **kwargs):
 
         time_models = dict()
         for tag in models:
-            time_models[tag] = round(timeit("self.perform_optimizing_models_multithread(tag, *args, **kwargs)"))
+            time_models[tag] = self.perform_optimizing_models_multithread(
+                tag, *args, **kwargs
+            )
 
-        return self.best_models, pd.DataFrame(time_models, index=["Time Models"])
+        return self.best_models, pd.DataFrame(
+            time_models, index=["Time Models"]
+        )

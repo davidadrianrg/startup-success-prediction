@@ -12,12 +12,41 @@ from tensorflow import keras
 
 from models import customized_metrics as cm
 from models import multithreading as mth
-import timeit
+import logging
+import time
+
+from functools import wraps
+
+logger = logging.getLogger(__name__)
+
+
+# Misc logger setup so a debug log statement gets printed on stdout.
+logger.setLevel("DEBUG")
+handler = logging.StreamHandler()
+log_format = "%(asctime)s %(levelname)s -- %(message)s"
+formatter = logging.Formatter(log_format)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 class HpDNN:
     def __init__(self):
         pass
+
+    def timed(func):
+        """This decorator prints the execution time for the decorated function."""
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            start = time.time()
+            result = func(*args, **kwargs)
+            end = time.time()
+            logger.debug(
+                "{} ran in {}s".format(func.__name__, round(end - start, 2))
+            )
+            return round(end - start, 2)
+
+        return wrapper
 
     @staticmethod
     def create_random_network(
@@ -76,7 +105,11 @@ class HpDNN:
             )
         model.add(keras.layers.Dense(n_classes, activation="softmax"))
         # Choosing a learning rate from a logarithmic uniform distrbution
-        optimizer = optimizer(learning_rate=round(loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10)))))
+        optimizer = optimizer(
+            learning_rate=round(
+                loguniform.rvs(lr[0], lr[1]), int(abs(math.log(lr[0], 10)))
+            )
+        )
         # Define some characteristics for the training process
         model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
         return model, optimizer, loss
@@ -126,6 +159,7 @@ class HpDNN:
             d[k] = [d[k] for d in historial]
         return d
 
+    @timed
     def perform_optimizing_DNN(
         self,
         X: np.ndarray,
@@ -175,12 +209,16 @@ class HpDNN:
         last_mean = 0
 
         # Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it
-        X_train_set, X_test, t_train_set, t_test = train_test_split(X, t, train_size=train_size)
+        X_train_set, X_test, t_train_set, t_test = train_test_split(
+            X, t, train_size=train_size
+        )
 
         # Loop for different trials or models to train in order to find the best
         for row in range(trials):
 
-            model_aux, optimizer, loss = self.create_random_network(m, n_classes, metrics=metrics)
+            model_aux, optimizer, loss = self.create_random_network(
+                m, n_classes, metrics=metrics
+            )
             params, comp = self.get_hyperparams(model_aux)
 
             print(f"\n***Trial {row+1} hyperparameters***", end="\n\n")
@@ -237,9 +275,10 @@ class HpDNN:
                 last_mean = means
 
     def optimize_DNN(self, *args, **kwargs):
-        timeDNN_seq = round(timeit("perform_optimizing_DNN(*args, **kwargs)"), 4)
-        return self.best_model, self.test_set, timeDNN_seq
+        timeDNN_seq = self.perform_optimizing_DNN(*args, **kwargs)
+        return (self.best_model, self.test_set), timeDNN_seq
 
+    @timed
     def perform_optimize_DNN_multithread(
         self,
         X: np.ndarray,
@@ -289,13 +328,17 @@ class HpDNN:
         last_mean = 0
 
         # Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it
-        X_train_set, X_test, t_train_set, t_test = train_test_split(X, t, train_size=train_size)
+        X_train_set, X_test, t_train_set, t_test = train_test_split(
+            X, t, train_size=train_size
+        )
 
         # Loop for different trials or models to train in order to find the best
         threads_dict = {}
         for row in range(trials):
 
-            model_aux, optimizer, loss = HpDNN.create_random_network(m, n_classes, metrics=metrics)
+            model_aux, optimizer, loss = HpDNN.create_random_network(
+                m, n_classes, metrics=metrics
+            )
             params, comp = HpDNN.get_hyperparams(model_aux)
 
             print(f"\n***Trial {row+1} hyperparameters***", end="\n\n")
@@ -321,7 +364,9 @@ class HpDNN:
                 t_val = to_categorical(t_val, num_classes=n_classes)
 
                 # Training of the model using multithreading
-                thread = mth.DnnThread(X_train, t_train, X_val, t_val, model, epochs, batch_size)
+                thread = mth.DnnThread(
+                    X_train, t_train, X_val, t_val, model, epochs, batch_size
+                )
                 thread.start()
                 threads_dict[row].append(thread)
 
@@ -336,7 +381,9 @@ class HpDNN:
                 historial.append(thread.history.history)
                 mean = np.mean(thread.history.history["val_accuracy"])
                 mean_folds.append(mean)
-                print(f"\nKFold{threads_dict[row].index(thread)+1} --- Current score: {mean}")
+                print(
+                    f"\nKFold{threads_dict[row].index(thread)+1} --- Current score: {mean}"
+                )
 
             # Criterion to choose the best model with the highest accuracy score in validation
             means = np.mean(mean_folds)
@@ -351,5 +398,5 @@ class HpDNN:
                 last_mean = means
 
     def optimize_DNN_multithread(self, *args, **kwargs):
-        timeDNN_thr = round(timeit("perform_optimize_DNN_multithread(*args, **kwargs)"), 4)
-        return self.best_model, self.test_set, timeDNN_thr
+        timeDNN_thr = self.perform_optimize_DNN_multithread(*args, **kwargs)
+        return (self.best_model, self.test_set), timeDNN_thr
