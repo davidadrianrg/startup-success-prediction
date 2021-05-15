@@ -782,7 +782,7 @@ class Report:
         :type img_title: str, optional
         """
         self.save_image(
-            Anomalies.plot_autoencoder_error(**kwargs), filename, img_title
+            anomalies.plot_autoencoder_error(**kwargs), filename, img_title
         )
 
     def print_PCA(

@@ -68,7 +68,7 @@ def get_best_models(
     :rtype: tuple
     """
     if is_mthreading:
-        best_models, _ = HpModels().optimizing_models_multithread(
+        best_models, time_models = HpModels.optimizing_models_multithread(
             models,
             X,
             t,
@@ -77,7 +77,7 @@ def get_best_models(
             scoring=scoring,
             trials=trials,
         )
-        best_DNN, _ = HpDNN().optimize_DNN_multithread(
+        best_DNN, time_dnn = HpDNN.optimize_DNN_multithread(
             X,
             t,
             kfolds=cv,
@@ -88,7 +88,7 @@ def get_best_models(
             metrics=metrics,
         )
     else:
-        best_models, _ = HpModels().optimizing_models(
+        best_models, time_models = HpModels.optimizing_models(
             models,
             X,
             t,
@@ -97,7 +97,7 @@ def get_best_models(
             scoring=scoring,
             trials=trials,
         )
-        best_DNN, _ = HpDNN().optimize_DNN(
+        best_DNN, time_dnn = HpDNN.optimize_DNN(
             X,
             t,
             kfolds=cv,
@@ -107,7 +107,7 @@ def get_best_models(
             batch_size=batch_size,
             metrics=metrics,
         )
-    return (best_models, train_size), best_DNN
+    return (best_models, train_size), best_DNN, (time_models, time_dnn)
 
 
 def get_results(best_models: tuple, best_DNN: tuple) -> pd.DataFrame:
