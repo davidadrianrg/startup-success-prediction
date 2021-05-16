@@ -11,7 +11,7 @@ import scipy.stats as stats
 import seaborn as sns
 from keras.utils import to_categorical
 
-# from md2pdf.core import md2pdf
+from md2pdf.core import md2pdf
 from preprocessing.detect_anomalies import Anomalies
 from sklearn.base import BaseEstimator
 from sklearn.metrics import (
@@ -820,7 +820,8 @@ class Report:
             align="center",
             tick_label=X.columns.values.tolist(),
         )
-        ax.set_xticks(rotation="vertical")
+        xlabels = ax.get_xticklabels()
+        ax.set_xticklabels(xlabels, rotation="vertical")
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         fig.set_tight_layout(True)
