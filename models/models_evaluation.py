@@ -67,8 +67,11 @@ def get_best_models(
     :return: A tuple containing a tuple with the best_models and train_size and a tuple with the bestDNN model
     :rtype: tuple
     """
+
+    hpmodels = HpModels()
+    hpdnn = HpDNN()
     if is_mthreading:
-        best_models, time_models = HpModels.optimizing_models_multithread(
+        best_models, time_models = hpmodels.optimizing_models_multithread(
             models,
             X,
             t,
@@ -77,7 +80,7 @@ def get_best_models(
             scoring=scoring,
             trials=trials,
         )
-        best_DNN, time_dnn = HpDNN.optimize_DNN_multithread(
+        best_DNN, time_dnn = hpdnn.optimize_DNN_multithread(
             X,
             t,
             kfolds=cv,
@@ -88,7 +91,7 @@ def get_best_models(
             metrics=metrics,
         )
     else:
-        best_models, time_models = HpModels.optimizing_models(
+        best_models, time_models = hpmodels.optimizing_models(
             models,
             X,
             t,
@@ -97,7 +100,7 @@ def get_best_models(
             scoring=scoring,
             trials=trials,
         )
-        best_DNN, time_dnn = HpDNN.optimize_DNN(
+        best_DNN, time_dnn = hpdnn.optimize_DNN(
             X,
             t,
             kfolds=cv,
@@ -107,7 +110,10 @@ def get_best_models(
             batch_size=batch_size,
             metrics=metrics,
         )
-    return (best_models, train_size), best_DNN, (time_models, time_dnn)
+    time_log = time_models.to_dict()
+    time_log.update({"DNN": {"Time Models": time_dnn}})
+    time_log = pd.DataFrame(time_log)
+    return (best_models, train_size), best_DNN, time_log
 
 
 def get_results(best_models: tuple, best_DNN: tuple) -> pd.DataFrame:

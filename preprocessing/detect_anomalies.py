@@ -1,6 +1,5 @@
 """Module to implement the anomalies detection methodes."""
 
-from typing_extensions import ParamSpecKwargs
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,10 +12,10 @@ from sklearn.preprocessing import StandardScaler
 
 
 class Anomalies:
-    """Class with clustering techniques implemented for unsupervised learning"""
+    """Class with clustering techniques implemented for unsupervised learning."""
 
     def __init__(self, X, t, train_size, anomalies_size):
-        """Contructor method which customized dataset to apply anomalies detection techniques
+        """Contructor method which customized dataset to apply anomalies detection techniques.
 
         :param X: Dataset samples
         :type X: pd.DataFrame
@@ -46,9 +45,9 @@ class Anomalies:
         self.autoencoder = None
 
     def perform_IsolationForest(
-        self, n_estimators=100, contamination=0, **kwargs
+        self, n_estimators=100, target_names=None, contamination=0, **kwargs
     ):
-        """Isolation Forest algorithm
+        """Isolation Forest algorithm.
 
         :param n_estimators: number of estimators used, defaults to 100
         :type n_estimators: int, optional
@@ -62,13 +61,12 @@ class Anomalies:
         )
         model.fit(self.X_train)
         y_test = model.predict(self.X_test)
-        target_names = ["Anomalía", "Normal"]
         return classification_report(
             self.t_test, y_test, target_names=target_names
         )
 
-    def perform_LOF(self, n_neighbors=10, novelty=True):
-        """LOF algorithm
+    def perform_LOF(self, n_neighbors=10, target_names=None, novelty=True):
+        """LOF algorithm.
 
         :param n_neighbors: number of data neighbours used, defaults to 10
         :type n_neighbors: int, optional
@@ -80,13 +78,12 @@ class Anomalies:
         model = LocalOutlierFactor(n_neighbors=n_neighbors, novelty=novelty)
         model.fit(self.X_train)
         y_test = model.predict(self.X_test)
-        target_names = ["Anomalía", "Normal"]
         return classification_report(
             self.t_test, y_test, target_names=target_names
         )
 
     def perform_autoencoding(self):
-        """Creates an autoencoder neural network"""
+        """Create an autoencoder neural network."""
         _, variables = self.X_train.shape
         autoencoder = models.Sequential()
         autoencoder.add(layers.Dense(1, input_dim=variables, activation="relu"))
@@ -96,7 +93,7 @@ class Anomalies:
         self.autoencoder = autoencoder
 
     def train_autoencoding(self, epochs=200, batch_size=100, **kwargs):
-        """Fits autoencoder neural network
+        """Fits autoencoder neural network.
 
         :param epochs: number of times all data is passed to network, defaults to 200
         :type epochs: int, optional
@@ -117,7 +114,7 @@ class Anomalies:
         legend: tuple = ("Entrenamiento", "Test"),
         figsize: tuple = (12, 4),
     ):
-        """Plots autoencoder validation curve
+        """Plot autoencoder validation curve.
 
         :param xlabel: plot xlabel, defaults to "Mean Square Error (MSE)"
         :type xlabel: str, optional
@@ -145,7 +142,7 @@ class Anomalies:
         legend: tuple = ("Threshold"),
         figsize: tuple = (12, 4),
     ):
-        """Predicts anomalies by recontructing samples passed to encoder
+        """Predicts anomalies by recontructing samples passed to encoder.
 
         :param xlabel: xlabel plot, defaults to "Reconstruction error (training)"
         :type xlabel: str, optional
@@ -177,7 +174,7 @@ class Anomalies:
         legend: tuple = ("Training", "Test", "Threshold"),
         figsize: tuple = (12, 4),
     ):
-        """Plots autoencoder error
+        """Plot autoencoder error.
 
         :param xlabel: xlabel plot, defaults to "Data Index"
         :type xlabel: str, optional
@@ -209,8 +206,8 @@ class Anomalies:
         ax.legend(legend, loc="upper left")
         return fig
 
-    def get_autoencoder_clreport(self):
-        """Generates classification report with autoencoders results
+    def get_autoencoder_clreport(self, target_names=None):
+        """Generate classification report with autoencoders results.
 
         :return: classification report with results
         :rtype: str
@@ -219,7 +216,6 @@ class Anomalies:
         threshold = np.max(self.mse_train)
         y_test[self.mse_test > threshold] = -1
 
-        target_names = ["Anomalía", "Normal"]
         return classification_report(
             self.t_test, y_test, target_names=target_names
         )

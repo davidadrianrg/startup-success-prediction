@@ -428,7 +428,7 @@ def make_report(
         report.print_title("Clasificación No Supervisada", 2)
         report.print_line()
         report.print_title("Reducción de la dimensionalidad", 4)
-        report.print_PCA(df_dict["X"], Dimension.get_PCA(df_dict("X")))
+        report.print_PCA(df_dict["X"], Dimension.get_PCA(df_dict["X"]))
         report.print_title("Clustering", 4)
         report.print_title("K-means clustering", 5)
         report.print_kmeans(
@@ -437,12 +437,12 @@ def make_report(
         report.print_title("DBSCAN clustering", 5)
         report.print_dbscan(Clustering.perform_DBSCAN(df_dict["X"]))
         report.print_title("Detección de anomalías", 4)
-        report.print_title("Isolation Forest", 5)
+        report.print_title("Isolation Forest - Classification Report", 5)
         anomalies = Anomalies(
-            df_dict["X"], df_dict["t"], train_size=2, anomalies_size=0.5
+            df_dict["X"], df_dict["t"], train_size=0.8, anomalies_size=0.05
         )
         report.print_noformat(anomalies.perform_IsolationForest())
-        report.print_title("Local Oulier Factor (LOF)", 5)
+        report.print_title("Local Oulier Factor (LOF) - Classification Report", 5)
         report.print_noformat(anomalies.perform_LOF())
         report.print_title("Autoencoding", 5)
         report.print_line()
@@ -451,6 +451,8 @@ def make_report(
         report.print_autoencoder_validation(anomalies)
         report.print_autoencoder_threshold(anomalies)
         report.print_autoencoder_error(anomalies)
+        report.print_title("Autoencoding Classification Report", 5)
+        report.print_noformat(anomalies.get_autoencoder_clreport())
 
         # Generating the chapter Time log
         report.print_title("Registro de tiempos de entrenamiento", 2)
@@ -467,12 +469,7 @@ def make_report(
             "Tiempos del entrenamiento de los modelos de clasificación supervisada",
             4,
         )
-        report.print_dataframe(time_log[0])
-        report.print_title(
-            "Tiempos del entrenamiento del modelo de red neuronal en clasificación supervisada",
-            4,
-        )
-        report.print_dataframe(time_log[1])
+        report.print_dataframe(time_log)
 
 
 if __name__ == "__main__":
@@ -481,9 +478,9 @@ if __name__ == "__main__":
     df_dict, features_list = make_preprocessing("data/startup_data.csv")
 
     # Training different models using the previous dataset
-    results, best_models, best_DNN = train_models(
+    results, best_models, best_DNN, time_log = train_models(
         df_dict.get("X").values, df_dict.get("t").values
     )
 
     # Generating the report with the results of the training
-    make_report(df_dict, features_list, results, best_models, best_DNN)
+    make_report(df_dict, features_list, results, best_models, best_DNN, time_log)
