@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "startup-success-prediction"
 copyright = "2021, David Adrian Rodriguez Garcia & Victor Cainzos Lopez"
 author = "David Adrian Rodriguez Garcia & Victor Cainzos Lopez"
-
+version = "v2.0"
 
 # -- General configuration ---------------------------------------------------
 

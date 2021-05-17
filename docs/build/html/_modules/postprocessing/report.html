@@ -165,11 +165,20 @@
 <span class="kn">import</span> <span class="nn">scipy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">from</span> <span class="nn">keras.utils</span> <span class="kn">import</span> <span class="n">to_categorical</span>
+
 <span class="kn">from</span> <span class="nn">md2pdf.core</span> <span class="kn">import</span> <span class="n">md2pdf</span>
+<span class="kn">from</span> <span class="nn">preprocessing.detect_anomalies</span> <span class="kn">import</span> <span class="n">Anomalies</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">auc</span><span class="p">,</span> <span class="n">classification_report</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">plot_confusion_matrix</span><span class="p">,</span> <span class="n">roc_curve</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">auc</span><span class="p">,</span>
+    <span class="n">classification_report</span><span class="p">,</span>
+    <span class="n">confusion_matrix</span><span class="p">,</span>
+    <span class="n">plot_confusion_matrix</span><span class="p">,</span>
+    <span class="n">roc_curve</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">validation_curve</span>
 <span class="kn">from</span> <span class="nn">statsmodels.stats.multicomp</span> <span class="kn">import</span> <span class="n">MultiComparison</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
 
 
 <div class="viewcode-block" id="Report"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report">[docs]</a><span class="k">class</span> <span class="nc">Report</span><span class="p">:</span>
@@ -279,7 +288,9 @@
                 <span class="n">output</span> <span class="o">+=</span> <span class="n">unordered</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">listmd</span><span class="p">:</span>
-                <span class="n">output</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">listmd</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">listmd</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
         <span class="k">return</span> <span class="n">output</span></div>
 
 <div class="viewcode-block" id="Report.parse_code"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.parse_code">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -328,7 +339,9 @@
 <span class="sd">        :return: String output with html &lt;pre&gt; tags</span>
 <span class="sd">        :rtype: [type]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">pdfstring</span> <span class="o">=</span> <span class="n">mdstring</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;```no-format&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;pre&gt;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;```&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/pre&gt;&quot;</span><span class="p">)</span>
+        <span class="n">pdfstring</span> <span class="o">=</span> <span class="n">mdstring</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;```no-format&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;pre&gt;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="s2">&quot;```&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;/pre&gt;&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">pdfstring</span></div>
 
     <span class="c1"># Print methods to write markdown report</span>
@@ -448,7 +461,9 @@
 <span class="sd">        :param size_dpi: Number for the resolution dpi of the image, defaults to 100</span>
 <span class="sd">        :type size_dpi: int, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">disp</span> <span class="o">=</span> <span class="n">plot_confusion_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_test</span><span class="p">)</span>  <span class="c1"># Show confusion matrix plot</span>
+        <span class="n">disp</span> <span class="o">=</span> <span class="n">plot_confusion_matrix</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_test</span>
+        <span class="p">)</span>  <span class="c1"># Show confusion matrix plot</span>
         <span class="n">disp</span><span class="o">.</span><span class="n">figure_</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">img_title</span><span class="p">)</span>  <span class="c1"># Add title to the confusion matrix</span>
         <span class="n">disp</span><span class="o">.</span><span class="n">figure_</span><span class="o">.</span><span class="n">set_dpi</span><span class="p">(</span><span class="n">size_dpi</span><span class="p">)</span>  <span class="c1"># Set figure dpi</span>
         <span class="n">disp</span><span class="o">.</span><span class="n">ax_</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
@@ -521,8 +536,12 @@
 <span class="sd">        :type legend_loc: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Binarizing classes</span>
-        <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t_test</span><span class="p">))</span>  <span class="c1"># Calculate the number of classes in the problem</span>
-        <span class="n">t_test_bin</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_test</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>  <span class="c1"># Recoding the labels to binary values</span>
+        <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t_test</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># Calculate the number of classes in the problem</span>
+        <span class="n">t_test_bin</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span>
+            <span class="n">t_test</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span>
+        <span class="p">)</span>  <span class="c1"># Recoding the labels to binary values</span>
 
         <span class="c1"># Ploting the figure with each roc curve per class</span>
         <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
@@ -588,7 +607,9 @@
 <span class="sd">        :param title: String title for the classification report, defaults to &quot;Classification report&quot;</span>
 <span class="sd">        :type title: str, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">print_noformat</span><span class="p">(</span><span class="n">title</span> <span class="o">+</span> <span class="s2">&quot;:</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">t_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_noformat</span><span class="p">(</span>
+            <span class="n">title</span> <span class="o">+</span> <span class="s2">&quot;:</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">t_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Report.print_hpcontrast"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_hpcontrast">[docs]</a>    <span class="k">def</span> <span class="nf">print_hpcontrast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Contrast the hypoteses of the scores given in the list and print the results in the report.</span>
@@ -605,7 +626,9 @@
         <span class="n">_</span><span class="p">,</span> <span class="n">pVal</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kruskal</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="p">)</span>
         <span class="n">str_toprint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;p-valor KrusW:</span><span class="si">{</span><span class="n">pVal</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="n">pVal</span> <span class="o">&lt;=</span> <span class="n">alpha</span><span class="p">:</span>
-            <span class="n">str_toprint</span> <span class="o">+=</span> <span class="s2">&quot;Hypotheses are being rejected: the models are different</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">str_toprint</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s2">&quot;Hypotheses are being rejected: the models are different</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
             <span class="n">stacked_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
             <span class="n">cv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">model_rep</span> <span class="o">=</span> <span class="p">[]</span>
@@ -616,7 +639,10 @@
             <span class="n">comp</span> <span class="o">=</span> <span class="n">multi_comp</span><span class="o">.</span><span class="n">tukeyhsd</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">)</span>
             <span class="n">str_toprint</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">str_toprint</span> <span class="o">=</span> <span class="n">str_toprint</span> <span class="o">+</span> <span class="s2">&quot;Hypotheses are being accepted: the models are equal&quot;</span>
+            <span class="n">str_toprint</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">str_toprint</span>
+                <span class="o">+</span> <span class="s2">&quot;Hypotheses are being accepted: the models are equal&quot;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">print_noformat</span><span class="p">(</span><span class="n">str_toprint</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Report.print_validation_curve"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_validation_curve">[docs]</a>    <span class="k">def</span> <span class="nf">print_validation_curve</span><span class="p">(</span>
@@ -669,7 +695,9 @@
 
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
         <span class="n">fig</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="n">figsize</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">img_title</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="n">param_name</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">img_title</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="n">param_name</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="n">ylabel</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">lw</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span>
             <span class="n">param_range</span><span class="p">,</span>
@@ -790,7 +818,173 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">report_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_dataframe</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">rows</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Report.save_image"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.save_image">[docs]</a>    <span class="k">def</span> <span class="nf">save_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Report.print_kmeans"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_kmeans">[docs]</a>    <span class="k">def</span> <span class="nf">print_kmeans</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">inertia_dic</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Inertia&quot;</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;kmeans.png&quot;</span><span class="p">,</span>
+        <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;KMeans Clustering&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the kmeans clustering for the given X dataframe and inertias dictionary.</span>
+
+<span class="sd">        :param inertia_dic: Dictionary with the inertias obtained from kmeans model</span>
+<span class="sd">        :type inertia_dic: dict</span>
+<span class="sd">        :param X: Dataframe to be clustered</span>
+<span class="sd">        :type X: np.ndarray</span>
+<span class="sd">        :param ylabel: String with the label for the y axe, defaults to &quot;Inertia&quot;</span>
+<span class="sd">        :type ylabel: str, optional</span>
+<span class="sd">        :param filename: String with the filename of the output image, defaults to &quot;kmeans.png&quot;</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param img_title: String with the title of the output image, defaults to &quot;KMeans Clustering&quot;</span>
+<span class="sd">        :type img_title: str, optional</span>
+<span class="sd">        :param figsize: Tuple with the image dimensions, defaults to (10, 8)</span>
+<span class="sd">        :type figsize: tuple, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">inertia_dic</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">inertia_dic</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_tight_layout</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_title</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.print_dbscan"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_dbscan">[docs]</a>    <span class="k">def</span> <span class="nf">print_dbscan</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">distances</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">xlabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Ordered points per distance to the nearest k-neighbor&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Distance to the nearest k-neighbor&quot;</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dbscan.png&quot;</span><span class="p">,</span>
+        <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;DBSCAN Clustering&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the dbscan clustering for the given distances list.</span>
+
+<span class="sd">        :param distances: List with the distances between data points</span>
+<span class="sd">        :type distances: list</span>
+<span class="sd">        :param X: Dataframe to be clustered</span>
+<span class="sd">        :type X: np.ndarray</span>
+<span class="sd">        :param ylabel: String with the label for the y axe, defaults to &quot;Inertia&quot;</span>
+<span class="sd">        :type ylabel: str, optional</span>
+<span class="sd">        :param filename: String with the filename of the output image, defaults to &quot;kmeans.png&quot;</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param img_title: String with the title of the output image, defaults to &quot;KMeans Clustering&quot;</span>
+<span class="sd">        :type img_title: str, optional</span>
+<span class="sd">        :param figsize: Tuple with the image dimensions, defaults to (10, 8)</span>
+<span class="sd">        :type figsize: tuple, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_title</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.print_autoencoder_validation"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_autoencoder_validation">[docs]</a>    <span class="k">def</span> <span class="nf">print_autoencoder_validation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">anomalies</span><span class="p">:</span> <span class="n">Anomalies</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;autoencoder_validation.png&quot;</span><span class="p">,</span>
+        <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Autoencoder Validation&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the autoencoder validation graph to the report.</span>
+
+<span class="sd">        :param Anomalies: An instance of the class Anomalies to be printed</span>
+<span class="sd">        :type Anomalies: preprocessing.Anomalies</span>
+<span class="sd">        :param filename: String with the filename of the output image, defaults to &quot;autoencoder_validation.png&quot;</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param img_title: String with the title of the output image, defaults to &quot;Autoencoder Validation&quot;</span>
+<span class="sd">        :type img_title: str, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span>
+            <span class="n">anomalies</span><span class="o">.</span><span class="n">plot_autoencoder_validation</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_title</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.print_autoencoder_threshold"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_autoencoder_threshold">[docs]</a>    <span class="k">def</span> <span class="nf">print_autoencoder_threshold</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">anomalies</span><span class="p">:</span> <span class="n">Anomalies</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;autoencoder_threshold.png&quot;</span><span class="p">,</span>
+        <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Autoencoder Threshold&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the autoencoder threshold graph to the report.</span>
+
+<span class="sd">        :param Anomalies: An instance of the class Anomalies to be printed</span>
+<span class="sd">        :type Anomalies: preprocessing.Anomalies</span>
+<span class="sd">        :param filename: String with the filename of the output image, defaults to &quot;autoencoder_threshold.png&quot;</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param img_title: String with the title of the output image, defaults to &quot;Autoencoder Threshold&quot;</span>
+<span class="sd">        :type img_title: str, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span>
+            <span class="n">anomalies</span><span class="o">.</span><span class="n">plot_autoencoder_threshold</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_title</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.print_autoencoder_error"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_autoencoder_error">[docs]</a>    <span class="k">def</span> <span class="nf">print_autoencoder_error</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">anomalies</span><span class="p">:</span> <span class="n">Anomalies</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;autoencoder_error.png&quot;</span><span class="p">,</span>
+        <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Autoencoder Error&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the autoencoder error graph to the report.</span>
+
+<span class="sd">        :param Anomalies: An instance of the class Anomalies to be printed</span>
+<span class="sd">        :type Anomalies: preprocessing.Anomalies</span>
+<span class="sd">        :param filename: String with the filename of the output image, defaults to &quot;autoencoder_threshold.png&quot;</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param img_title: String with the title of the output image, defaults to &quot;Autoencoder Threshold&quot;</span>
+<span class="sd">        :type img_title: str, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span>
+            <span class="n">anomalies</span><span class="o">.</span><span class="n">plot_autoencoder_error</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_title</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.print_PCA"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.print_PCA">[docs]</a>    <span class="k">def</span> <span class="nf">print_PCA</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">pca</span><span class="p">:</span> <span class="n">PCA</span><span class="p">,</span>
+        <span class="n">xlabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Main Components&quot;</span><span class="p">,</span>
+        <span class="n">ylabel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Variance %&quot;</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pca.png&quot;</span><span class="p">,</span>
+        <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;PCA&quot;</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the PCA dimension graph to the report.</span>
+
+<span class="sd">        :param X: Pandas Dataframe with the characteristic matrix</span>
+<span class="sd">        :type X: pd.DataFrame</span>
+<span class="sd">        :param pca: [description]</span>
+<span class="sd">        :type pca: PCA</span>
+<span class="sd">        :param xlabel: String with the label for the x axe, defaults to &quot;Main Components&quot;</span>
+<span class="sd">        :type xlabel: str, optional</span>
+<span class="sd">        :param ylabel: String with the label for the y axe, defaults to &quot;Variance %&quot;</span>
+<span class="sd">        :type ylabel: str, optional</span>
+<span class="sd">        :param filename: String with the filename of the output image, defaults to &quot;pca.png&quot;</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param img_title: String with the title of the output image, defaults to &quot;PCA&quot;</span>
+<span class="sd">        :type img_title: str, optional</span>
+<span class="sd">        :param figsize: Tuple with the image dimensions, defaults to (10, 5)</span>
+<span class="sd">        :type figsize: tuple, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="n">pca</span><span class="o">.</span><span class="n">explained_variance_ratio_</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+            <span class="n">tick_label</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">xlabels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xticklabels</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">xlabels</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_tight_layout</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_image</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">img_title</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Report.save_image"><a class="viewcode-back" href="../../classes.html#postprocessing.report.Report.save_image">[docs]</a>    <span class="k">def</span> <span class="nf">save_image</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">img_title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Image saving method to file and report.</span>
 
 <span class="sd">        :param figure: Matplotlib figure to be printed in the report file</span>
