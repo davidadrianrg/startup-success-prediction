@@ -9,7 +9,6 @@ Preprocessing module
     :members:
     :show-inheritance:
 
-
 ================
 Training modules
 ================
@@ -18,14 +17,7 @@ Training modules
     :members:
     :show-inheritance:
 
-.. automodule:: models.hyperparametersTunning
-    :members:
-    :show-inheritance:
-
-.. automodule:: models.hyperparametersDNN
-    :members:
-    :show-inheritance:
-
 .. automodule:: models.customized_metrics
     :members:
     :show-inheritance:
+

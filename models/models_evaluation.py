@@ -9,14 +9,14 @@ from sklearn.base import BaseEstimator
 from tensorflow.keras.models import Sequential
 
 from models import customized_metrics as cm
-from models import hyperparametersDNN as hpDNN
-from models import hyperparametersTunning as hpTune
+from models.hyperparametersDNN import HpDNN
+from models.hyperparametersTunning import HpModels
 
 
 def get_best_models(
     X: np.ndarray,
     t: np.ndarray,
-    models: list = hpTune.select_models(),
+    models: list = HpModels.select_models(),
     cv: int = 10,
     train_size: float = 0.8,
     scoring: dict = {
@@ -38,6 +38,7 @@ def get_best_models(
         cm.f1_score,
         "AUC",
     ),
+    is_mthreading: bool = False,
 ) -> tuple:
     """Return the best models generated with random hyperparameters using the arguments as training hyperparameters.
 
@@ -45,7 +46,7 @@ def get_best_models(
     :type X: np.ndarray
     :param t: Vector labels numpy array of the dataset which will be evaluated
     :type t: np.ndarray
-    :param models: List with the selected model tags, defaults to hpTune.select_models()
+    :param models: List with the selected model tags, defaults to HpModels.select_models()
     :type models: list, optional
     :param cv: Number of folds for the cross validation algorithm, defaults to 10
     :type cv: int, optional
@@ -61,29 +62,57 @@ def get_best_models(
     :type batch_size: int, optional
     :param metrics: Tuple with the metrics to compare and evaluate the differene neural networks, defaults to ( "accuracy", "Recall", cm.specificity, "Precision", cm.f1_score, "AUC", )
     :type metrics: tuple, optional
+    :param is_mthreading: Boolean to enable/disable multithreading during the training of the models, defaults to False.
+    :type is_mthreading: bool, optional
     :return: A tuple containing a tuple with the best_models and train_size and a tuple with the bestDNN model
     :rtype: tuple
     """
-    best_models = hpTune.optimizing_models(
-        models,
-        X,
-        t,
-        cv=cv,
-        train_size=train_size,
-        scoring=scoring,
-        trials=trials,
-    )
-    best_DNN = hpDNN.optimize_DNN(
-        X,
-        t,
-        kfolds=cv,
-        train_size=train_size,
-        trials=trials,
-        epochs=epochs,
-        batch_size=batch_size,
-        metrics=metrics,
-    )
-    return (best_models, train_size), best_DNN
+    hpmodels = HpModels()
+    hpdnn = HpDNN()
+    if is_mthreading:
+        best_models, time_models = hpmodels.optimizing_models_multithread(
+            models,
+            X,
+            t,
+            cv=cv,
+            train_size=train_size,
+            scoring=scoring,
+            trials=trials,
+        )
+        best_DNN, time_dnn = hpdnn.optimize_DNN_multithread(
+            X,
+            t,
+            kfolds=cv,
+            train_size=train_size,
+            trials=trials,
+            epochs=epochs,
+            batch_size=batch_size,
+            metrics=metrics,
+        )
+    else:
+        best_models, time_models = hpmodels.optimizing_models(
+            models,
+            X,
+            t,
+            cv=cv,
+            train_size=train_size,
+            scoring=scoring,
+            trials=trials,
+        )
+        best_DNN, time_dnn = hpdnn.optimize_DNN(
+            X,
+            t,
+            kfolds=cv,
+            train_size=train_size,
+            trials=trials,
+            epochs=epochs,
+            batch_size=batch_size,
+            metrics=metrics,
+        )
+    time_log = time_models.to_dict()
+    time_log.update({"DNN": {"Time Models": time_dnn}})
+    time_log = pd.DataFrame(time_log)
+    return (best_models, train_size), best_DNN, time_log
 
 
 def get_results(best_models: tuple, best_DNN: tuple) -> pd.DataFrame:
@@ -112,8 +141,12 @@ def get_results(best_models: tuple, best_DNN: tuple) -> pd.DataFrame:
         if "test_" + metric in best_models[tags[0]][0]:
 
             for tag in tags:
-                data[tag + "_train_" + metric] = best_models[tag][0]["train_" + metric]
-                data[tag + "_val_" + metric] = best_models[tag][0]["test_" + metric]
+                data[tag + "_train_" + metric] = best_models[tag][0][
+                    "train_" + metric
+                ]
+                data[tag + "_val_" + metric] = best_models[tag][0][
+                    "test_" + metric
+                ]
 
             data["DNN_train_" + metric] = DNN_means[metric]
             data["DNN_val_" + metric] = DNN_means["val_" + metric]
@@ -136,7 +169,9 @@ def analize_performance_DNN(
     n_classes = len(np.unique(t_test))
     t_test_bin = to_categorical(t_test, num_classes=n_classes)
     results = pd.DataFrame(columns=best_DNN[0][0].metrics_names)
-    results.loc["DNN_test"] = best_DNN[0][0].evaluate(X_test, t_test_bin, batch_size=None, verbose=0)
+    results.loc["DNN_test"] = best_DNN[0][0].evaluate(
+        X_test, t_test_bin, batch_size=None, verbose=0
+    )
     y_pred_proba = best_DNN[0][0].predict(X_test)
     y_pred = np.ndarray.tolist(y_pred_proba)
     y_pred_len = len(y_pred)
@@ -144,7 +179,9 @@ def analize_performance_DNN(
     return results, X_test, t_test, y_out, y_pred_proba
 
 
-def analize_performance_models(best_models: tuple, X: np.ndarray, t: np.ndarray) -> tuple:
+def analize_performance_models(
+    best_models: tuple, X: np.ndarray, t: np.ndarray
+) -> tuple:
     """Get the best models and dataset values and returns the models trained and the numpy arrays with the test values and predicted values.
 
     :param best_models: Tuple with the best models
@@ -161,7 +198,9 @@ def analize_performance_models(best_models: tuple, X: np.ndarray, t: np.ndarray)
     y_pred = dict()
     y_score = dict()
 
-    X_train, X_test, t_train, t_test = train_test_split(X, t, train_size=train_size)
+    X_train, X_test, t_train, t_test = train_test_split(
+        X, t, train_size=train_size
+    )
     for model in best_models:
         best_models[model][1].fit(X_train, t_train)
         y_pred[model] = best_models[model][1].predict(X_test)
@@ -182,10 +221,12 @@ def get_hyperparams(model: BaseEstimator, tag: str) -> pd.DataFrame:
     :return: A pandas DataFrame with the hyperparameters used in the given model.
     :rtype: pd.DataFrame
     """
-    return hpTune.get_hyperparameters(model, tag)
+    return HpModels.get_hyperparameters(model, tag)
 
 
-def get_hyperparams_DNN(model: Sequential) -> (pd.DataFrame, pd.DataFrame):
+def get_hyperparams_DNN(
+    model: Sequential,
+) -> tuple((pd.DataFrame, pd.DataFrame)):
     """Wrapp the get_hyperparams function in hyperparametersDNN module.
 
     Return the hyperparams of the model passed as an argument.
@@ -195,4 +236,4 @@ def get_hyperparams_DNN(model: Sequential) -> (pd.DataFrame, pd.DataFrame):
     :return: A tuple with a pandas Dataframe with the hyperparameters of the neural network and a pandas Dataframe with the parameters of the optimezer used in the model
     :rtype: tuple
     """
-    return hpDNN.get_hyperparams(model)
+    return HpDNN.get_hyperparams(model)
