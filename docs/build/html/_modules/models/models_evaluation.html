@@ -164,14 +164,14 @@
 <span class="kn">from</span> <span class="nn">tensorflow.keras.models</span> <span class="kn">import</span> <span class="n">Sequential</span>
 
 <span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">customized_metrics</span> <span class="k">as</span> <span class="n">cm</span>
-<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">hyperparametersDNN</span> <span class="k">as</span> <span class="n">hpDNN</span>
-<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">hyperparametersTunning</span> <span class="k">as</span> <span class="n">hpTune</span>
+<span class="kn">from</span> <span class="nn">models.hyperparametersDNN</span> <span class="kn">import</span> <span class="n">HpDNN</span>
+<span class="kn">from</span> <span class="nn">models.hyperparametersTunning</span> <span class="kn">import</span> <span class="n">HpModels</span>
 
 
 <div class="viewcode-block" id="get_best_models"><a class="viewcode-back" href="../../util.html#models.models_evaluation.get_best_models">[docs]</a><span class="k">def</span> <span class="nf">get_best_models</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">models</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">hpTune</span><span class="o">.</span><span class="n">select_models</span><span class="p">(),</span>
+    <span class="n">models</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">HpModels</span><span class="o">.</span><span class="n">select_models</span><span class="p">(),</span>
     <span class="n">cv</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="n">train_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
     <span class="n">scoring</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -193,6 +193,7 @@
         <span class="n">cm</span><span class="o">.</span><span class="n">f1_score</span><span class="p">,</span>
         <span class="s2">&quot;AUC&quot;</span><span class="p">,</span>
     <span class="p">),</span>
+    <span class="n">is_mthreading</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Return the best models generated with random hyperparameters using the arguments as training hyperparameters.</span>
 
@@ -200,7 +201,7 @@
 <span class="sd">    :type X: np.ndarray</span>
 <span class="sd">    :param t: Vector labels numpy array of the dataset which will be evaluated</span>
 <span class="sd">    :type t: np.ndarray</span>
-<span class="sd">    :param models: List with the selected model tags, defaults to hpTune.select_models()</span>
+<span class="sd">    :param models: List with the selected model tags, defaults to HpModels.select_models()</span>
 <span class="sd">    :type models: list, optional</span>
 <span class="sd">    :param cv: Number of folds for the cross validation algorithm, defaults to 10</span>
 <span class="sd">    :type cv: int, optional</span>
@@ -216,29 +217,57 @@
 <span class="sd">    :type batch_size: int, optional</span>
 <span class="sd">    :param metrics: Tuple with the metrics to compare and evaluate the differene neural networks, defaults to ( &quot;accuracy&quot;, &quot;Recall&quot;, cm.specificity, &quot;Precision&quot;, cm.f1_score, &quot;AUC&quot;, )</span>
 <span class="sd">    :type metrics: tuple, optional</span>
+<span class="sd">    :param is_mthreading: Boolean to enable/disable multithreading during the training of the models, defaults to False.</span>
+<span class="sd">    :type is_mthreading: bool, optional</span>
 <span class="sd">    :return: A tuple containing a tuple with the best_models and train_size and a tuple with the bestDNN model</span>
 <span class="sd">    :rtype: tuple</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">best_models</span> <span class="o">=</span> <span class="n">hpTune</span><span class="o">.</span><span class="n">optimizing_models</span><span class="p">(</span>
-        <span class="n">models</span><span class="p">,</span>
-        <span class="n">X</span><span class="p">,</span>
-        <span class="n">t</span><span class="p">,</span>
-        <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
-        <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span>
-        <span class="n">scoring</span><span class="o">=</span><span class="n">scoring</span><span class="p">,</span>
-        <span class="n">trials</span><span class="o">=</span><span class="n">trials</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">best_DNN</span> <span class="o">=</span> <span class="n">hpDNN</span><span class="o">.</span><span class="n">optimize_DNN</span><span class="p">(</span>
-        <span class="n">X</span><span class="p">,</span>
-        <span class="n">t</span><span class="p">,</span>
-        <span class="n">kfolds</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
-        <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span>
-        <span class="n">trials</span><span class="o">=</span><span class="n">trials</span><span class="p">,</span>
-        <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
-        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-        <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">best_models</span><span class="p">,</span> <span class="n">train_size</span><span class="p">),</span> <span class="n">best_DNN</span></div>
+    <span class="n">hpmodels</span> <span class="o">=</span> <span class="n">HpModels</span><span class="p">()</span>
+    <span class="n">hpdnn</span> <span class="o">=</span> <span class="n">HpDNN</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_mthreading</span><span class="p">:</span>
+        <span class="n">best_models</span><span class="p">,</span> <span class="n">time_models</span> <span class="o">=</span> <span class="n">hpmodels</span><span class="o">.</span><span class="n">optimizing_models_multithread</span><span class="p">(</span>
+            <span class="n">models</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">t</span><span class="p">,</span>
+            <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">scoring</span><span class="p">,</span>
+            <span class="n">trials</span><span class="o">=</span><span class="n">trials</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">best_DNN</span><span class="p">,</span> <span class="n">time_dnn</span> <span class="o">=</span> <span class="n">hpdnn</span><span class="o">.</span><span class="n">optimize_DNN_multithread</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">t</span><span class="p">,</span>
+            <span class="n">kfolds</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span>
+            <span class="n">trials</span><span class="o">=</span><span class="n">trials</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">best_models</span><span class="p">,</span> <span class="n">time_models</span> <span class="o">=</span> <span class="n">hpmodels</span><span class="o">.</span><span class="n">optimizing_models</span><span class="p">(</span>
+            <span class="n">models</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">t</span><span class="p">,</span>
+            <span class="n">cv</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">scoring</span><span class="p">,</span>
+            <span class="n">trials</span><span class="o">=</span><span class="n">trials</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">best_DNN</span><span class="p">,</span> <span class="n">time_dnn</span> <span class="o">=</span> <span class="n">hpdnn</span><span class="o">.</span><span class="n">optimize_DNN</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">t</span><span class="p">,</span>
+            <span class="n">kfolds</span><span class="o">=</span><span class="n">cv</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span>
+            <span class="n">trials</span><span class="o">=</span><span class="n">trials</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">time_log</span> <span class="o">=</span> <span class="n">time_models</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">time_log</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;DNN&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Time Models&quot;</span><span class="p">:</span> <span class="n">time_dnn</span><span class="p">}})</span>
+    <span class="n">time_log</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">time_log</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">best_models</span><span class="p">,</span> <span class="n">train_size</span><span class="p">),</span> <span class="n">best_DNN</span><span class="p">,</span> <span class="n">time_log</span></div>
 
 
 <div class="viewcode-block" id="get_results"><a class="viewcode-back" href="../../util.html#models.models_evaluation.get_results">[docs]</a><span class="k">def</span> <span class="nf">get_results</span><span class="p">(</span><span class="n">best_models</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">best_DNN</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -267,8 +296,12 @@
         <span class="k">if</span> <span class="s2">&quot;test_&quot;</span> <span class="o">+</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">]:</span>
 
             <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
-                <span class="n">data</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s2">&quot;_train_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_models</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;train_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span>
-                <span class="n">data</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s2">&quot;_val_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_models</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;test_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s2">&quot;_train_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_models</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span>
+                    <span class="s2">&quot;train_&quot;</span> <span class="o">+</span> <span class="n">metric</span>
+                <span class="p">]</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">tag</span> <span class="o">+</span> <span class="s2">&quot;_val_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_models</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span>
+                    <span class="s2">&quot;test_&quot;</span> <span class="o">+</span> <span class="n">metric</span>
+                <span class="p">]</span>
 
             <span class="n">data</span><span class="p">[</span><span class="s2">&quot;DNN_train_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">DNN_means</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
             <span class="n">data</span><span class="p">[</span><span class="s2">&quot;DNN_val_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">DNN_means</span><span class="p">[</span><span class="s2">&quot;val_&quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">]</span>
@@ -291,7 +324,9 @@
     <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t_test</span><span class="p">))</span>
     <span class="n">t_test_bin</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_test</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">best_DNN</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metrics_names</span><span class="p">)</span>
-    <span class="n">results</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DNN_test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_DNN</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">t_test_bin</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">results</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;DNN_test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_DNN</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+        <span class="n">X_test</span><span class="p">,</span> <span class="n">t_test_bin</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)</span>
     <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="n">best_DNN</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="n">tolist</span><span class="p">(</span><span class="n">y_pred_proba</span><span class="p">)</span>
     <span class="n">y_pred_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span>
@@ -299,7 +334,9 @@
     <span class="k">return</span> <span class="n">results</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_test</span><span class="p">,</span> <span class="n">y_out</span><span class="p">,</span> <span class="n">y_pred_proba</span></div>
 
 
-<div class="viewcode-block" id="analize_performance_models"><a class="viewcode-back" href="../../util.html#models.models_evaluation.analize_performance_models">[docs]</a><span class="k">def</span> <span class="nf">analize_performance_models</span><span class="p">(</span><span class="n">best_models</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<div class="viewcode-block" id="analize_performance_models"><a class="viewcode-back" href="../../util.html#models.models_evaluation.analize_performance_models">[docs]</a><span class="k">def</span> <span class="nf">analize_performance_models</span><span class="p">(</span>
+    <span class="n">best_models</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get the best models and dataset values and returns the models trained and the numpy arrays with the test values and predicted values.</span>
 
 <span class="sd">    :param best_models: Tuple with the best models</span>
@@ -316,7 +353,9 @@
     <span class="n">y_pred</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">y_score</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_train</span><span class="p">,</span> <span class="n">t_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_train</span><span class="p">,</span> <span class="n">t_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span>
+    <span class="p">)</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">best_models</span><span class="p">:</span>
         <span class="n">best_models</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">t_train</span><span class="p">)</span>
         <span class="n">y_pred</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_models</span><span class="p">[</span><span class="n">model</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -337,10 +376,12 @@
 <span class="sd">    :return: A pandas DataFrame with the hyperparameters used in the given model.</span>
 <span class="sd">    :rtype: pd.DataFrame</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">hpTune</span><span class="o">.</span><span class="n">get_hyperparameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">HpModels</span><span class="o">.</span><span class="n">get_hyperparameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_hyperparams_DNN"><a class="viewcode-back" href="../../util.html#models.models_evaluation.get_hyperparams_DNN">[docs]</a><span class="k">def</span> <span class="nf">get_hyperparams_DNN</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Sequential</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<div class="viewcode-block" id="get_hyperparams_DNN"><a class="viewcode-back" href="../../util.html#models.models_evaluation.get_hyperparams_DNN">[docs]</a><span class="k">def</span> <span class="nf">get_hyperparams_DNN</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Sequential</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;Wrapp the get_hyperparams function in hyperparametersDNN module.</span>
 
 <span class="sd">    Return the hyperparams of the model passed as an argument.</span>
@@ -350,7 +391,7 @@
 <span class="sd">    :return: A tuple with a pandas Dataframe with the hyperparameters of the neural network and a pandas Dataframe with the parameters of the optimezer used in the model</span>
 <span class="sd">    :rtype: tuple</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">hpDNN</span><span class="o">.</span><span class="n">get_hyperparams</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">HpDNN</span><span class="o">.</span><span class="n">get_hyperparams</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

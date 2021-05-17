@@ -10,11 +10,20 @@ import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
 from keras.utils import to_categorical
+
 from md2pdf.core import md2pdf
+from preprocessing.detect_anomalies import Anomalies
 from sklearn.base import BaseEstimator
-from sklearn.metrics import auc, classification_report, confusion_matrix, plot_confusion_matrix, roc_curve
+from sklearn.metrics import (
+    auc,
+    classification_report,
+    confusion_matrix,
+    plot_confusion_matrix,
+    roc_curve,
+)
 from sklearn.model_selection import validation_curve
 from statsmodels.stats.multicomp import MultiComparison
+from sklearn.decomposition import PCA
 
 
 class Report:
@@ -124,7 +133,9 @@ class Report:
                 output += unordered + " " + str(element) + "\n"
         else:
             for element in listmd:
-                output += str(listmd.index(element) + 1) + ". " + str(element) + "\n"
+                output += (
+                    str(listmd.index(element) + 1) + ". " + str(element) + "\n"
+                )
         return output
 
     @staticmethod
@@ -173,7 +184,9 @@ class Report:
         :return: String output with html <pre> tags
         :rtype: [type]
         """
-        pdfstring = mdstring.replace("```no-format", "<pre>").replace("```", "</pre>")
+        pdfstring = mdstring.replace("```no-format", "<pre>").replace(
+            "```", "</pre>"
+        )
         return pdfstring
 
     # Print methods to write markdown report
@@ -293,7 +306,9 @@ class Report:
         :param size_dpi: Number for the resolution dpi of the image, defaults to 100
         :type size_dpi: int, optional
         """
-        disp = plot_confusion_matrix(model, X_test, t_test)  # Show confusion matrix plot
+        disp = plot_confusion_matrix(
+            model, X_test, t_test
+        )  # Show confusion matrix plot
         disp.figure_.suptitle(img_title)  # Add title to the confusion matrix
         disp.figure_.set_dpi(size_dpi)  # Set figure dpi
         disp.ax_.set_xlabel(xlabel)
@@ -366,8 +381,12 @@ class Report:
         :type legend_loc: str
         """
         # Binarizing classes
-        n_classes = len(np.unique(t_test))  # Calculate the number of classes in the problem
-        t_test_bin = to_categorical(t_test, num_classes=n_classes)  # Recoding the labels to binary values
+        n_classes = len(
+            np.unique(t_test)
+        )  # Calculate the number of classes in the problem
+        t_test_bin = to_categorical(
+            t_test, num_classes=n_classes
+        )  # Recoding the labels to binary values
 
         # Ploting the figure with each roc curve per class
         fig = plt.figure(figsize=figsize)
@@ -433,7 +452,9 @@ class Report:
         :param title: String title for the classification report, defaults to "Classification report"
         :type title: str, optional
         """
-        self.print_noformat(title + ":\n\n" + str(classification_report(t_test, y_pred)))
+        self.print_noformat(
+            title + ":\n\n" + str(classification_report(t_test, y_pred))
+        )
 
     def print_hpcontrast(self, data: list, labels: list, alpha: float = 0.05):
         """Contrast the hypoteses of the scores given in the list and print the results in the report.
@@ -450,7 +471,9 @@ class Report:
         _, pVal = stats.kruskal(*data)
         str_toprint = f"p-valor KrusW:{pVal}\n"
         if pVal <= alpha:
-            str_toprint += "Hypotheses are being rejected: the models are different\n"
+            str_toprint += (
+                "Hypotheses are being rejected: the models are different\n"
+            )
             stacked_data = np.vstack(data).ravel()
             cv = len(data[0])
             model_rep = []
@@ -461,7 +484,10 @@ class Report:
             comp = multi_comp.tukeyhsd(alpha=alpha)
             str_toprint += str(comp)
         else:
-            str_toprint = str_toprint + "Hypotheses are being accepted: the models are equal"
+            str_toprint = (
+                str_toprint
+                + "Hypotheses are being accepted: the models are equal"
+            )
         self.print_noformat(str_toprint)
 
     def print_validation_curve(
@@ -514,7 +540,9 @@ class Report:
 
         fig, ax = plt.subplots()
         fig.figsize = figsize
-        ax.set(title=img_title, xlabel=param_name, ylabel=ylabel, ylim=(0.0, 1.1))
+        ax.set(
+            title=img_title, xlabel=param_name, ylabel=ylabel, ylim=(0.0, 1.1)
+        )
         lw = 2
         ax.semilogx(
             param_range,
@@ -635,7 +663,173 @@ class Report:
         else:
             self.report_file.write(self.parse_dataframe(data, rows))
 
-    def save_image(self, figure: plt.Figure, filename: str, img_title: str, **kwargs):
+    def print_kmeans(
+        self,
+        inertia_dic: dict,
+        X: np.ndarray,
+        ylabel: str = "Inertia",
+        filename: str = "kmeans.png",
+        img_title: str = "KMeans Clustering",
+        figsize: tuple = (10, 8),
+    ):
+        """Print the kmeans clustering for the given X dataframe and inertias dictionary.
+
+        :param inertia_dic: Dictionary with the inertias obtained from kmeans model
+        :type inertia_dic: dict
+        :param X: Dataframe to be clustered
+        :type X: np.ndarray
+        :param ylabel: String with the label for the y axe, defaults to "Inertia"
+        :type ylabel: str, optional
+        :param filename: String with the filename of the output image, defaults to "kmeans.png"
+        :type filename: str, optional
+        :param img_title: String with the title of the output image, defaults to "KMeans Clustering"
+        :type img_title: str, optional
+        :param figsize: Tuple with the image dimensions, defaults to (10, 8)
+        :type figsize: tuple, optional
+        """
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.plot(inertia_dic.keys(), inertia_dic.values(), marker="x")
+        ax.set_xlabel("k")
+        ax.set_xticks(range(1, len(X.columns) + 1))
+        ax.set_ylabel(ylabel)
+        fig.set_tight_layout(True)
+        self.save_image(fig, filename, img_title)
+
+    def print_dbscan(
+        self,
+        distances: dict,
+        xlabel: str = "Ordered points per distance to the nearest k-neighbor",
+        ylabel: str = "Distance to the nearest k-neighbor",
+        filename: str = "dbscan.png",
+        img_title: str = "DBSCAN Clustering",
+        figsize: tuple = (10, 8),
+    ):
+        """Print the dbscan clustering for the given distances list.
+
+        :param distances: List with the distances between data points
+        :type distances: list
+        :param X: Dataframe to be clustered
+        :type X: np.ndarray
+        :param ylabel: String with the label for the y axe, defaults to "Inertia"
+        :type ylabel: str, optional
+        :param filename: String with the filename of the output image, defaults to "kmeans.png"
+        :type filename: str, optional
+        :param img_title: String with the title of the output image, defaults to "KMeans Clustering"
+        :type img_title: str, optional
+        :param figsize: Tuple with the image dimensions, defaults to (10, 8)
+        :type figsize: tuple, optional
+        """
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.plot(distances)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        self.save_image(fig, filename, img_title)
+
+    def print_autoencoder_validation(
+        self,
+        anomalies: Anomalies,
+        filename: str = "autoencoder_validation.png",
+        img_title: str = "Autoencoder Validation",
+        **kwargs,
+    ):
+        """Print the autoencoder validation graph to the report.
+
+        :param Anomalies: An instance of the class Anomalies to be printed
+        :type Anomalies: preprocessing.Anomalies
+        :param filename: String with the filename of the output image, defaults to "autoencoder_validation.png"
+        :type filename: str, optional
+        :param img_title: String with the title of the output image, defaults to "Autoencoder Validation"
+        :type img_title: str, optional
+        """
+        self.save_image(
+            anomalies.plot_autoencoder_validation(**kwargs), filename, img_title
+        )
+
+    def print_autoencoder_threshold(
+        self,
+        anomalies: Anomalies,
+        filename: str = "autoencoder_threshold.png",
+        img_title: str = "Autoencoder Threshold",
+        **kwargs,
+    ):
+        """Print the autoencoder threshold graph to the report.
+
+        :param Anomalies: An instance of the class Anomalies to be printed
+        :type Anomalies: preprocessing.Anomalies
+        :param filename: String with the filename of the output image, defaults to "autoencoder_threshold.png"
+        :type filename: str, optional
+        :param img_title: String with the title of the output image, defaults to "Autoencoder Threshold"
+        :type img_title: str, optional
+        """
+        self.save_image(
+            anomalies.plot_autoencoder_threshold(**kwargs), filename, img_title
+        )
+
+    def print_autoencoder_error(
+        self,
+        anomalies: Anomalies,
+        filename: str = "autoencoder_error.png",
+        img_title: str = "Autoencoder Error",
+        **kwargs,
+    ):
+        """Print the autoencoder error graph to the report.
+
+        :param Anomalies: An instance of the class Anomalies to be printed
+        :type Anomalies: preprocessing.Anomalies
+        :param filename: String with the filename of the output image, defaults to "autoencoder_threshold.png"
+        :type filename: str, optional
+        :param img_title: String with the title of the output image, defaults to "Autoencoder Threshold"
+        :type img_title: str, optional
+        """
+        self.save_image(
+            anomalies.plot_autoencoder_error(**kwargs), filename, img_title
+        )
+
+    def print_PCA(
+        self,
+        X: pd.DataFrame,
+        pca: PCA,
+        xlabel: str = "Main Components",
+        ylabel: str = "Variance %",
+        filename: str = "pca.png",
+        img_title: str = "PCA",
+        figsize: tuple = (10, 5),
+    ):
+        """Print the PCA dimension graph to the report.
+
+        :param X: Pandas Dataframe with the characteristic matrix
+        :type X: pd.DataFrame
+        :param pca: [description]
+        :type pca: PCA
+        :param xlabel: String with the label for the x axe, defaults to "Main Components"
+        :type xlabel: str, optional
+        :param ylabel: String with the label for the y axe, defaults to "Variance %"
+        :type ylabel: str, optional
+        :param filename: String with the filename of the output image, defaults to "pca.png"
+        :type filename: str, optional
+        :param img_title: String with the title of the output image, defaults to "PCA"
+        :type img_title: str, optional
+        :param figsize: Tuple with the image dimensions, defaults to (10, 5)
+        :type figsize: tuple, optional
+        """
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.bar(
+            X.columns.values.tolist(),
+            pca.explained_variance_ratio_ * 100,
+            color="b",
+            align="center",
+            tick_label=X.columns.values.tolist(),
+        )
+        xlabels = ax.get_xticklabels()
+        ax.set_xticklabels(xlabels, rotation="vertical")
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        fig.set_tight_layout(True)
+        self.save_image(fig, filename, img_title)
+
+    def save_image(
+        self, figure: plt.Figure, filename: str, img_title: str, **kwargs
+    ):
         """Image saving method to file and report.
 
         :param figure: Matplotlib figure to be printed in the report file
