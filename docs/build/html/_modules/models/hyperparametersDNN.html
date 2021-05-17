@@ -166,204 +166,409 @@
 <span class="kn">from</span> <span class="nn">tensorflow</span> <span class="kn">import</span> <span class="n">keras</span>
 
 <span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">customized_metrics</span> <span class="k">as</span> <span class="n">cm</span>
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">multithreading</span> <span class="k">as</span> <span class="n">mth</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="create_random_network"><a class="viewcode-back" href="../../util.html#models.hyperparametersDNN.create_random_network">[docs]</a><span class="k">def</span> <span class="nf">create_random_network</span><span class="p">(</span>
-    <span class="n">m</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">n_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">metrics</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
-    <span class="n">layers</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-    <span class="n">n</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
-    <span class="n">activation</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="s2">&quot;sigmoid&quot;</span><span class="p">),</span>
-    <span class="n">lr</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Optimizer</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">,</span>
-    <span class="n">loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;categorical_crossentropy&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">,</span> <span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a deep neural network model with pseudo-random hyperparameters according to its arguments, each time it is called.</span>
-
-<span class="sd">    :param m: Number of input variables which will enter in the neural network</span>
-<span class="sd">    :type m: int</span>
-<span class="sd">    :param n_classes: Number of classes to be classificated</span>
-<span class="sd">    :type n_classes: int</span>
-<span class="sd">    :param metrics: String with the metric to evaluate and compare the different random networks, defaults to &quot;accuracy&quot;</span>
-<span class="sd">    :type metrics: str, optional</span>
-<span class="sd">    :param layers: Tuple with the number of layers of the neural network as hyperparameter, defaults to (1, 5)</span>
-<span class="sd">    :type layers: tuple, optional</span>
-<span class="sd">    :param n: Tuple with the min and max number of neurons per layer, defaults to (10,20)</span>
-<span class="sd">    :type n: tuple, optional</span>
-<span class="sd">    :param activation: Tuple with the activation functions as hyperparameters, defaults to (&quot;relu&quot;,&quot;sigmoid&quot;)</span>
-<span class="sd">    :type activation: tuple, optional</span>
-<span class="sd">    :param lr: Tuple with the min and max values for the learning rate as hyperparameter, defaults to (1e-5, 1e-3)</span>
-<span class="sd">    :type lr: tuple, optional</span>
-<span class="sd">    :param optimizer: A keras Optimizer to be used to train the neural network, defaults to keras.optimizers.Adam</span>
-<span class="sd">    :type optimizer: keras.optimizers.Optimizer</span>
-<span class="sd">    :param loss: String with the lossing function to be used to measure the error, defaults to &quot;categorical_crossentropy&quot;</span>
-<span class="sd">    :type loss: str</span>
-<span class="sd">    :return: A tuple formed by the keras.models.Sequential, keras.optimizers.Optimizer, and the lossing function</span>
-<span class="sd">    :rtype: tuple</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Defining the model class Sequential in order to add layers one by one</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span>
-    <span class="c1"># First layer of de network</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
-        <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
-            <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-            <span class="n">input_dim</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
-            <span class="n">activation</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">activation</span><span class="p">),</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-    <span class="c1"># Input Normalization, working as a StandardScaler() tranformer for input data</span>
-    <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()</span>
-    <span class="c1"># Loop which adds layers following a uniform random distribution</span>
-    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">activation</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">activation</span><span class="p">)))</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">n_classes</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;softmax&quot;</span><span class="p">))</span>
-    <span class="c1"># Choosing a learning rate from a logarithmic uniform distrbution</span>
-    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">loguniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)))))</span>
-    <span class="c1"># Define some characteristics for the training process</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span></div>
+<span class="c1"># Misc logger setup so a debug log statement gets printed on stdout.</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span>
+<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+<span class="n">log_format</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> </span><span class="si">%(levelname)s</span><span class="s2"> -- </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+<span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">log_format</span><span class="p">)</span>
+<span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_hyperparams"><a class="viewcode-back" href="../../util.html#models.hyperparametersDNN.get_hyperparams">[docs]</a><span class="k">def</span> <span class="nf">get_hyperparams</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the hyperparams of the model passed as an argument.</span>
+<div class="viewcode-block" id="HpDNN"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN">[docs]</a><span class="k">class</span> <span class="nc">HpDNN</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class to implement the hyperparameter tunning for the deep neural network.&quot;&quot;&quot;</span>
 
-<span class="sd">    :param model: A keras.models.Sequential neural network model</span>
-<span class="sd">    :type model: keras.models.Sequential</span>
-<span class="sd">    :return: A tuple with a pandas Dataframe with the hyperparameters of the neural network and a pandas Dataframe with the parameters of the optimezer used in the model</span>
-<span class="sd">    :rtype: tuple</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">neurons</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">activation</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">nlayers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create an instance of the HpDNN class.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nlayers</span><span class="p">):</span>
-        <span class="n">neurons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
-        <span class="n">activation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">()[</span><span class="s2">&quot;activation&quot;</span><span class="p">])</span>
-        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;layer &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
-    <span class="n">lr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">learning_rate</span><span class="o">.</span><span class="n">value</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;neurons&quot;</span><span class="p">:</span> <span class="n">neurons</span><span class="p">,</span>
-        <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="n">activation</span><span class="p">,</span>
-    <span class="p">}</span>
-    <span class="n">comp</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">get_config</span><span class="p">()[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">lr</span><span class="p">}</span>
-    <span class="n">dfparams</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">layers</span><span class="p">)</span>
-    <span class="n">dfcomp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;compiler&quot;</span><span class="p">])</span>
+<div class="viewcode-block" id="HpDNN.timed"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.timed">[docs]</a>    <span class="k">def</span> <span class="nf">timed</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the execution time for the decorated function.&quot;&quot;&quot;</span>
 
-    <span class="k">return</span> <span class="n">dfparams</span><span class="p">,</span> <span class="n">dfcomp</span></div>
-
-
-<div class="viewcode-block" id="split_history_metrics"><a class="viewcode-back" href="../../util.html#models.hyperparametersDNN.split_history_metrics">[docs]</a><span class="k">def</span> <span class="nf">split_history_metrics</span><span class="p">(</span><span class="n">historial</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Transform the given list which contains the history results to a dictionary with the metrics organized.</span>
-
-<span class="sd">    :param historial: A list with the historical results of the trained model</span>
-<span class="sd">    :type historial: list</span>
-<span class="sd">    :return: A dictionary with the metrics obtained from the trained model</span>
-<span class="sd">    :rtype: dict</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">historial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">historial</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">d</span></div>
-
-
-<div class="viewcode-block" id="optimize_DNN"><a class="viewcode-back" href="../../util.html#models.hyperparametersDNN.optimize_DNN">[docs]</a><span class="k">def</span> <span class="nf">optimize_DNN</span><span class="p">(</span>
-    <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">kfolds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">train_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
-    <span class="n">trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-    <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
-    <span class="n">metrics</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">,</span> <span class="s2">&quot;Recall&quot;</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">specificity</span><span class="p">,</span> <span class="s2">&quot;Precision&quot;</span><span class="p">,</span> <span class="n">cm</span><span class="o">.</span><span class="n">f1_score</span><span class="p">,</span> <span class="s2">&quot;AUC&quot;</span><span class="p">),</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Train the current model using cross validation and register its score comparing with new ones in each trial.</span>
-
-<span class="sd">    :param X: Characteristic matrix numpy array of the dataset which will be evaluated</span>
-<span class="sd">    :type X: np.ndarray</span>
-<span class="sd">    :param t: Vector labels numpy array of the dataset which will be evaluated</span>
-<span class="sd">    :type t: np.ndarray</span>
-<span class="sd">    :param kfolds: Number of folds for the cross validation algorithm, defaults to 10</span>
-<span class="sd">    :type kfolds: int, optional</span>
-<span class="sd">    :param train_size: % of the data to be splitted into train and test values, defaults to 0.8</span>
-<span class="sd">    :type train_size: float, optional</span>
-<span class="sd">    :param trials: Number of trials used to generate random neural networks with different hyperparameters, defaults to 5</span>
-<span class="sd">    :type trials: int, optional</span>
-<span class="sd">    :param epochs: Number of maximum iterations allow to converge the algorithm, defaults to 50</span>
-<span class="sd">    :type epochs: int, optional</span>
-<span class="sd">    :param batch_size: Size of the batch used to calculate lossing function, defaults to 40</span>
-<span class="sd">    :type batch_size: int, optional</span>
-<span class="sd">    :param metrics: Tuple with the metrics to compare and evaluate the differene neural networks, defaults to (&quot;accuracy&quot;,&quot;Recall&quot;,cm.specificity,&quot;Precision&quot;,cm.f1_score,&quot;AUC&quot;)</span>
-<span class="sd">    :type metrics: tuple, optional</span>
-<span class="sd">    :return: A tuple containing a tuple with the model and the history of the training, and another tuple with the X_test and t_test arrays to evaluate the model</span>
-<span class="sd">    :rtype: tuple</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Its needed the accuracy metric, if it is not passed it will be auto-included</span>
-    <span class="k">if</span> <span class="s2">&quot;accuracy&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
-        <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
-
-    <span class="n">_</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
-    <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
-    <span class="n">cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">kfolds</span><span class="p">)</span>
-    <span class="n">last_mean</span> <span class="o">=</span> <span class="mi">0</span>
-
-    <span class="c1"># Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it</span>
-    <span class="n">X_train_set</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_train_set</span><span class="p">,</span> <span class="n">t_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">)</span>
-
-    <span class="c1"># Loop for different trials or models to train in order to find the best</span>
-    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
-
-        <span class="n">model_aux</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">create_random_network</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>
-        <span class="n">params</span><span class="p">,</span> <span class="n">comp</span> <span class="o">=</span> <span class="n">get_hyperparams</span><span class="p">(</span><span class="n">model_aux</span><span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">***Trial </span><span class="si">{</span><span class="n">row</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> hyperparameters***&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
-        <span class="n">fold</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="c1"># Lists to store historical data and means per fold for models</span>
-        <span class="n">historial</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">mean_folds</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="c1"># Loop that manage cross validation using training set</span>
-        <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X_train_set</span><span class="p">):</span>
-            <span class="c1"># This sentence carefully clones the untrained model in each fold in order to avoid unwanted learning weights between them</span>
-            <span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clone_model</span><span class="p">(</span><span class="n">model_aux</span><span class="p">)</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>
-
-            <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="n">X_train_set</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span> <span class="n">X_train_set</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
-            <span class="n">t_train</span><span class="p">,</span> <span class="n">t_val</span> <span class="o">=</span> <span class="n">t_train_set</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span> <span class="n">t_train_set</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
-
-            <span class="n">t_train</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_train</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
-            <span class="n">t_val</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_val</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
-
-            <span class="c1"># Training of the model</span>
-            <span class="n">history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-                <span class="n">X_train</span><span class="p">,</span>
-                <span class="n">t_train</span><span class="p">,</span>
-                <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">t_val</span><span class="p">),</span>
-                <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
-                <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
-                <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> ran in </span><span class="si">{}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
             <span class="p">)</span>
-            <span class="c1"># Save the train and test results,of the current model</span>
-            <span class="n">historial</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
-            <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;val_accuracy&quot;</span><span class="p">])</span>
-            <span class="n">mean_folds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">KFold</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2"> --- Current score: </span><span class="si">{</span><span class="n">mean</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">fold</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="c1"># Criterion to choose the best model with the highest accuracy score in validation</span>
-        <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mean_folds</span><span class="p">)</span>
-        <span class="n">history_metrics</span> <span class="o">=</span> <span class="n">split_history_metrics</span><span class="p">(</span><span class="n">historial</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Min. Train score: </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">history_metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]))</span><span class="si">}</span><span class="s2"> | Max. Train score: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">history_metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]))</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">wrapper</span></div>
+
+<div class="viewcode-block" id="HpDNN.create_random_network"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.create_random_network">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_random_network</span><span class="p">(</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">n_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+        <span class="n">layers</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+        <span class="n">n</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="n">activation</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="s2">&quot;sigmoid&quot;</span><span class="p">),</span>
+        <span class="n">lr</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Optimizer</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">,</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;categorical_crossentropy&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">,</span> <span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Return a deep neural network model with pseudo-random hyperparameters according to its arguments, each time it is called.</span>
+
+<span class="sd">        :param m: Number of input variables which will enter in the neural network</span>
+<span class="sd">        :type m: int</span>
+<span class="sd">        :param n_classes: Number of classes to be classificated</span>
+<span class="sd">        :type n_classes: int</span>
+<span class="sd">        :param metrics: String with the metric to evaluate and compare the different random networks, defaults to &quot;accuracy&quot;</span>
+<span class="sd">        :type metrics: str, optional</span>
+<span class="sd">        :param layers: Tuple with the number of layers of the neural network as hyperparameter, defaults to (1, 5)</span>
+<span class="sd">        :type layers: tuple, optional</span>
+<span class="sd">        :param n: Tuple with the min and max number of neurons per layer, defaults to (10,20)</span>
+<span class="sd">        :type n: tuple, optional</span>
+<span class="sd">        :param activation: Tuple with the activation functions as hyperparameters, defaults to (&quot;relu&quot;,&quot;sigmoid&quot;)</span>
+<span class="sd">        :type activation: tuple, optional</span>
+<span class="sd">        :param lr: Tuple with the min and max values for the learning rate as hyperparameter, defaults to (1e-5, 1e-3)</span>
+<span class="sd">        :type lr: tuple, optional</span>
+<span class="sd">        :param optimizer: A keras Optimizer to be used to train the neural network, defaults to keras.optimizers.Adam</span>
+<span class="sd">        :type optimizer: keras.optimizers.Optimizer</span>
+<span class="sd">        :param loss: String with the lossing function to be used to measure the error, defaults to &quot;categorical_crossentropy&quot;</span>
+<span class="sd">        :type loss: str</span>
+<span class="sd">        :return: A tuple formed by the keras.models.Sequential, keras.optimizers.Optimizer, and the lossing function</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Defining the model class Sequential in order to add layers one by one</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">()</span>
+        <span class="c1"># First layer of de network</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+                <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="n">input_dim</span><span class="o">=</span><span class="n">m</span><span class="p">,</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">activation</span><span class="p">),</span>
+            <span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">means</span> <span class="o">&gt;</span> <span class="n">last_mean</span><span class="p">:</span>
-            <span class="c1"># Save the model and its historial results</span>
-            <span class="n">best_model</span> <span class="o">=</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">history_metrics</span><span class="p">)</span>
-            <span class="n">test_set</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">t_test</span><span class="p">)</span>
-            <span class="n">last_mean</span> <span class="o">=</span> <span class="n">means</span>
-    <span class="k">return</span> <span class="n">best_model</span><span class="p">,</span> <span class="n">test_set</span></div>
+        <span class="c1"># Input Normalization, working as a StandardScaler() tranformer for input data</span>
+        <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()</span>
+        <span class="c1"># Loop which adds layers following a uniform random distribution</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">layers</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+                    <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="n">activation</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">activation</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">n_classes</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;softmax&quot;</span><span class="p">))</span>
+        <span class="c1"># Choosing a learning rate from a logarithmic uniform distrbution</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="p">(</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span>
+                <span class="n">loguniform</span><span class="o">.</span><span class="n">rvs</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lr</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># Define some characteristics for the training process</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span></div>
+
+<div class="viewcode-block" id="HpDNN.get_hyperparams"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.get_hyperparams">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_hyperparams</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Sequential</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Return the hyperparams of the model passed as an argument.</span>
+
+<span class="sd">        :param model: A keras.models.Sequential neural network model</span>
+<span class="sd">        :type model: keras.models.Sequential</span>
+<span class="sd">        :return: A tuple with a pandas Dataframe with the hyperparameters of the neural network and a pandas Dataframe with the parameters of the optimezer used in the model</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">neurons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">activation</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nlayers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nlayers</span><span class="p">):</span>
+            <span class="n">neurons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+            <span class="n">activation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_config</span><span class="p">()[</span><span class="s2">&quot;activation&quot;</span><span class="p">])</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;layer &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">lr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">learning_rate</span><span class="o">.</span><span class="n">value</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;neurons&quot;</span><span class="p">:</span> <span class="n">neurons</span><span class="p">,</span>
+            <span class="s2">&quot;activation&quot;</span><span class="p">:</span> <span class="n">activation</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">comp</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">get_config</span><span class="p">()[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">lr</span><span class="p">}</span>
+        <span class="n">dfparams</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">layers</span><span class="p">)</span>
+        <span class="n">dfcomp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;compiler&quot;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">dfparams</span><span class="p">,</span> <span class="n">dfcomp</span></div>
+
+<div class="viewcode-block" id="HpDNN.split_history_metrics"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.split_history_metrics">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">split_history_metrics</span><span class="p">(</span><span class="n">historial</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Transform the given list which contains the history results to a dictionary with the metrics organized.</span>
+
+<span class="sd">        :param historial: A list with the historical results of the trained model</span>
+<span class="sd">        :type historial: list</span>
+<span class="sd">        :return: A dictionary with the metrics obtained from the trained model</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">historial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">historial</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+
+<div class="viewcode-block" id="HpDNN.perform_optimizing_DNN"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.perform_optimizing_DNN">[docs]</a>    <span class="nd">@timed</span>
+    <span class="k">def</span> <span class="nf">perform_optimizing_DNN</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">kfolds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">train_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Recall&quot;</span><span class="p">,</span>
+            <span class="n">cm</span><span class="o">.</span><span class="n">specificity</span><span class="p">,</span>
+            <span class="s2">&quot;Precision&quot;</span><span class="p">,</span>
+            <span class="n">cm</span><span class="o">.</span><span class="n">f1_score</span><span class="p">,</span>
+            <span class="s2">&quot;AUC&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Train the current model using cross validation and register its score comparing with new ones in each trial.</span>
+
+<span class="sd">        :param X: Characteristic matrix numpy array of the dataset which will be evaluated</span>
+<span class="sd">        :type X: np.ndarray</span>
+<span class="sd">        :param t: Vector labels numpy array of the dataset which will be evaluated</span>
+<span class="sd">        :type t: np.ndarray</span>
+<span class="sd">        :param kfolds: Number of folds for the cross validation algorithm, defaults to 10</span>
+<span class="sd">        :type kfolds: int, optional</span>
+<span class="sd">        :param train_size: % of the data to be splitted into train and test values, defaults to 0.8</span>
+<span class="sd">        :type train_size: float, optional</span>
+<span class="sd">        :param trials: Number of trials used to generate random neural networks with different hyperparameters, defaults to 5</span>
+<span class="sd">        :type trials: int, optional</span>
+<span class="sd">        :param epochs: Number of maximum iterations allow to converge the algorithm, defaults to 50</span>
+<span class="sd">        :type epochs: int, optional</span>
+<span class="sd">        :param batch_size: Size of the batch used to calculate lossing function, defaults to 40</span>
+<span class="sd">        :type batch_size: int, optional</span>
+<span class="sd">        :param metrics: Tuple with the metrics to compare and evaluate the differene neural networks, defaults to (&quot;accuracy&quot;,&quot;Recall&quot;,cm.specificity,&quot;Precision&quot;,cm.f1_score,&quot;AUC&quot;)</span>
+<span class="sd">        :type metrics: tuple, optional</span>
+<span class="sd">        :return: A tuple containing a tuple with the model and the history of the training, and another tuple with the X_test and t_test arrays to evaluate the model</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Its needed the accuracy metric, if it is not passed it will be auto-included</span>
+        <span class="k">if</span> <span class="s2">&quot;accuracy&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="n">cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">kfolds</span><span class="p">)</span>
+        <span class="n">last_mean</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it</span>
+        <span class="n">X_train_set</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_train_set</span><span class="p">,</span> <span class="n">t_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Loop for different trials or models to train in order to find the best</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+
+            <span class="n">model_aux</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_random_network</span><span class="p">(</span>
+                <span class="n">m</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span>
+            <span class="p">)</span>
+            <span class="n">params</span><span class="p">,</span> <span class="n">comp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_hyperparams</span><span class="p">(</span><span class="n">model_aux</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">***Trial </span><span class="si">{</span><span class="n">row</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> hyperparameters***&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
+            <span class="n">fold</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="c1"># Lists to store historical data and means per fold for models</span>
+            <span class="n">historial</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">mean_folds</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Loop that manage cross validation using training set</span>
+            <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X_train_set</span><span class="p">):</span>
+                <span class="c1"># This sentence carefully clones the untrained model in each fold in order to avoid unwanted learning weights between them</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clone_model</span><span class="p">(</span><span class="n">model_aux</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>
+
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">X_train_set</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span>
+                    <span class="n">X_train_set</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="n">t_train</span><span class="p">,</span> <span class="n">t_val</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">t_train_set</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span>
+                    <span class="n">t_train_set</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span>
+                <span class="p">)</span>
+
+                <span class="n">t_train</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_train</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
+                <span class="n">t_val</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_val</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
+
+                <span class="c1"># Training of the model</span>
+                <span class="n">history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                    <span class="n">X_train</span><span class="p">,</span>
+                    <span class="n">t_train</span><span class="p">,</span>
+                    <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">t_val</span><span class="p">),</span>
+                    <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+                    <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="c1"># Save the train and test results,of the current model</span>
+                <span class="n">historial</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;val_accuracy&quot;</span><span class="p">])</span>
+                <span class="n">mean_folds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">KFold</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2"> --- Current score: </span><span class="si">{</span><span class="n">mean</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">fold</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># Criterion to choose the best model with the highest accuracy score in validation</span>
+            <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mean_folds</span><span class="p">)</span>
+            <span class="n">history_metrics</span> <span class="o">=</span> <span class="n">HpDNN</span><span class="o">.</span><span class="n">split_history_metrics</span><span class="p">(</span><span class="n">historial</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Min. Train score: </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">history_metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]))</span><span class="si">}</span><span class="s2"> | Max. Train score: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">history_metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]))</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">means</span> <span class="o">&gt;</span> <span class="n">last_mean</span><span class="p">:</span>
+                <span class="c1"># Save the model and its historial results</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">best_model</span> <span class="o">=</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">history_metrics</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">t_test</span><span class="p">)</span>
+                <span class="n">last_mean</span> <span class="o">=</span> <span class="n">means</span></div>
+
+<div class="viewcode-block" id="HpDNN.optimize_DNN"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.optimize_DNN">[docs]</a>    <span class="k">def</span> <span class="nf">optimize_DNN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Log the time of the perform_optimizing_DNN method.</span>
+
+<span class="sd">        :return: A tuple containing the return of the called function and its time log.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">timeDNN_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform_optimizing_DNN</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span><span class="p">),</span> <span class="n">timeDNN_seq</span></div>
+
+<div class="viewcode-block" id="HpDNN.perform_optimize_DNN_multithread"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.perform_optimize_DNN_multithread">[docs]</a>    <span class="nd">@timed</span>
+    <span class="k">def</span> <span class="nf">perform_optimize_DNN_multithread</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">kfolds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">train_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">trials</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Recall&quot;</span><span class="p">,</span>
+            <span class="n">cm</span><span class="o">.</span><span class="n">specificity</span><span class="p">,</span>
+            <span class="s2">&quot;Precision&quot;</span><span class="p">,</span>
+            <span class="n">cm</span><span class="o">.</span><span class="n">f1_score</span><span class="p">,</span>
+            <span class="s2">&quot;AUC&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Train the current model using cross validation and multithreading and register its score comparing with new ones in each trial.</span>
+
+<span class="sd">        :param X: Characteristic matrix numpy array of the dataset which will be evaluated</span>
+<span class="sd">        :type X: np.ndarray</span>
+<span class="sd">        :param t: Vector labels numpy array of the dataset which will be evaluated</span>
+<span class="sd">        :type t: np.ndarray</span>
+<span class="sd">        :param kfolds: Number of folds for the cross validation algorithm, defaults to 10</span>
+<span class="sd">        :type kfolds: int, optional</span>
+<span class="sd">        :param train_size: % of the data to be splitted into train and test values, defaults to 0.8</span>
+<span class="sd">        :type train_size: float, optional</span>
+<span class="sd">        :param trials: Number of trials used to generate random neural networks with different hyperparameters, defaults to 5</span>
+<span class="sd">        :type trials: int, optional</span>
+<span class="sd">        :param epochs: Number of maximum iterations allow to converge the algorithm, defaults to 50</span>
+<span class="sd">        :type epochs: int, optional</span>
+<span class="sd">        :param batch_size: Size of the batch used to calculate lossing function, defaults to 40</span>
+<span class="sd">        :type batch_size: int, optional</span>
+<span class="sd">        :param metrics: Tuple with the metrics to compare and evaluate the differene neural networks, defaults to (&quot;accuracy&quot;,&quot;Recall&quot;,cm.specificity,&quot;Precision&quot;,cm.f1_score,&quot;AUC&quot;)</span>
+<span class="sd">        :type metrics: tuple, optional</span>
+<span class="sd">        :return: A tuple containing a tuple with the model and the history of the training, and another tuple with the X_test and t_test arrays to evaluate the model</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Its needed the accuracy metric, if it is not passed it will be auto-included</span>
+        <span class="k">if</span> <span class="s2">&quot;accuracy&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="n">cv</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">kfolds</span><span class="p">)</span>
+        <span class="n">last_mean</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Split the data into train and test sets. Note that test set will be reserved for evaluate the best model later with data unseen previously for it</span>
+        <span class="n">X_train_set</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">t_train_set</span><span class="p">,</span> <span class="n">t_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Loop for different trials or models to train in order to find the best</span>
+        <span class="n">threads_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+
+            <span class="n">model_aux</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">HpDNN</span><span class="o">.</span><span class="n">create_random_network</span><span class="p">(</span>
+                <span class="n">m</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span>
+            <span class="p">)</span>
+            <span class="n">params</span><span class="p">,</span> <span class="n">comp</span> <span class="o">=</span> <span class="n">HpDNN</span><span class="o">.</span><span class="n">get_hyperparams</span><span class="p">(</span><span class="n">model_aux</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">***Trial </span><span class="si">{</span><span class="n">row</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> hyperparameters***&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
+            <span class="c1"># Lists to store threads to manage them</span>
+            <span class="n">threads_dict</span><span class="p">[</span><span class="n">row</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># Loop that manage cross validation using training set</span>
+            <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">cv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X_train_set</span><span class="p">):</span>
+                <span class="c1"># This sentence carefully clones the untrained model in each fold in order to avoid unwanted learning weights between them</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">clone_model</span><span class="p">(</span><span class="n">model_aux</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">)</span>
+
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">X_train_set</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span>
+                    <span class="n">X_train_set</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="n">t_train</span><span class="p">,</span> <span class="n">t_val</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">t_train_set</span><span class="p">[</span><span class="n">train_index</span><span class="p">],</span>
+                    <span class="n">t_train_set</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span>
+                <span class="p">)</span>
+
+                <span class="n">t_train</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_train</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
+                <span class="n">t_val</span> <span class="o">=</span> <span class="n">to_categorical</span><span class="p">(</span><span class="n">t_val</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
+
+                <span class="c1"># Training of the model using multithreading</span>
+                <span class="n">thread</span> <span class="o">=</span> <span class="n">mth</span><span class="o">.</span><span class="n">DnnThread</span><span class="p">(</span>
+                    <span class="n">X_train</span><span class="p">,</span> <span class="n">t_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">t_val</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">batch_size</span>
+                <span class="p">)</span>
+                <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">threads_dict</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span>
+
+        <span class="c1"># Save the train and test results,of the current model</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+            <span class="c1"># Lists to store historical data and means per fold</span>
+            <span class="n">historial</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">mean_folds</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">***Trial </span><span class="si">{</span><span class="n">row</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> results***&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">thread</span> <span class="ow">in</span> <span class="n">threads_dict</span><span class="p">[</span><span class="n">row</span><span class="p">]:</span>
+                <span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="n">historial</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thread</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">)</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">thread</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s2">&quot;val_accuracy&quot;</span><span class="p">])</span>
+                <span class="n">mean_folds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">KFold</span><span class="si">{</span><span class="n">threads_dict</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2"> --- Current score: </span><span class="si">{</span><span class="n">mean</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Criterion to choose the best model with the highest accuracy score in validation</span>
+            <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mean_folds</span><span class="p">)</span>
+            <span class="n">history_metrics</span> <span class="o">=</span> <span class="n">HpDNN</span><span class="o">.</span><span class="n">split_history_metrics</span><span class="p">(</span><span class="n">historial</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">Min. Train score: </span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">history_metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]))</span><span class="si">}</span><span class="s2"> | Max. Train score: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">history_metrics</span><span class="p">[</span><span class="s1">&#39;accuracy&#39;</span><span class="p">]))</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">means</span> <span class="o">&gt;</span> <span class="n">last_mean</span><span class="p">:</span>
+                <span class="c1"># Save the model and its historial results</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">best_model</span> <span class="o">=</span> <span class="p">(</span><span class="n">thread</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">history_metrics</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">t_test</span><span class="p">)</span>
+                <span class="n">last_mean</span> <span class="o">=</span> <span class="n">means</span></div>
+
+<div class="viewcode-block" id="HpDNN.optimize_DNN_multithread"><a class="viewcode-back" href="../../classes.html#models.hyperparametersDNN.HpDNN.optimize_DNN_multithread">[docs]</a>    <span class="k">def</span> <span class="nf">optimize_DNN_multithread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Log the time of the perform_optimize_DNN_multithread method.</span>
+
+<span class="sd">        :return: A tuple containing the return of the called function and its time log.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">timeDNN_thr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform_optimize_DNN_multithread</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_set</span><span class="p">),</span> <span class="n">timeDNN_thr</span></div></div>
 </pre></div>
 
            </div>
