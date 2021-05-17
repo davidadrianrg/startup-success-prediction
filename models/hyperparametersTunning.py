@@ -35,12 +35,15 @@ logger.addHandler(handler)
 
 
 class HpModels:
+    """Class to implement the hyperparameter tunning for different supervised classifier models."""
+
     def __init__(self):
+        """Create an instance of the HpModels class."""
         self.best_models = dict()
         self.threads_dict = dict()
 
     def timed(func):
-        """This decorator prints the execution time for the decorated function."""
+        """Print the execution time for the decorated function."""
 
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -341,8 +344,14 @@ class HpModels:
             macro_model.steps[1][1],
         )
 
-    def optimizing_models(self, models: list, *args, **kwargs) -> dict:
+    def optimizing_models(self, models: list, *args, **kwargs) -> tuple:
+        """Log the time of the perform_optimizing_model method.
 
+        :param models: List containing the tags to identify each model.
+        :type models: list
+        :return: A tuple containing the return of the called function and its time log.
+        :rtype: tuple
+        """
         time_models = dict()
         for tag in models:
             time_models[tag] = self.perform_optimizing_model(
@@ -355,7 +364,7 @@ class HpModels:
     @timed
     def perform_optimizing_models_multithread(
         self,
-        tag,
+        tag:str,
         X: np.ndarray,
         t: np.ndarray,
         train_size: float = 0.85,
@@ -431,8 +440,14 @@ class HpModels:
                 f"No solution valid for {tag}. Increase number of trials or kfolds."
             )
 
-    def optimizing_models_multithread(self, models: list, *args, **kwargs):
+    def optimizing_models_multithread(self, models: list, *args, **kwargs) -> tuple:
+        """Log the time of the perform_optimizing_models_multithread method.
 
+        :param models: List containing the tags to identify each model.
+        :type models: list
+        :return: A tuple containing the return of the called function and its time log.
+        :rtype: tuple
+        """
         time_models = dict()
         for tag in models:
             time_models[tag] = self.perform_optimizing_models_multithread(

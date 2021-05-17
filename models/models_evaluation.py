@@ -67,7 +67,6 @@ def get_best_models(
     :return: A tuple containing a tuple with the best_models and train_size and a tuple with the bestDNN model
     :rtype: tuple
     """
-
     hpmodels = HpModels()
     hpdnn = HpDNN()
     if is_mthreading:

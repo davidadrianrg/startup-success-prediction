@@ -1,3 +1,5 @@
+"""Module to implement the techniques for reducing dimensions of features."""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -6,11 +8,11 @@ from sklearn.decomposition import PCA, FastICA
 
 
 class Dimension:
-    """Class with implemented techniques for reducing dimensions of features"""
+    """Class with implemented techniques for reducing dimensions of features."""
 
     @staticmethod
     def get_correlation_matrix(X: pd.DataFrame):
-        """Calculates the correlation matriz of data features
+        """Calculate the correlation matriz of data features.
 
         :param X: Dataset of features and samples
         :type X: pd.DataFrame
@@ -25,7 +27,7 @@ class Dimension:
 
     @staticmethod
     def get_PCA(X: pd.DataFrame, **kwargs):
-        """Applies PCA technique to reduce dimensionality
+        """Apply PCA technique to reduce dimensionality.
 
         :param X: Dataset of features and samples
         :type X: pd.DataFrame

@@ -1,3 +1,5 @@
+"""Module to implement the unsupervised clustering."""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,11 +10,11 @@ from sklearn.neighbors import NearestNeighbors
 
 
 class Clustering:
-    """Class with clustering techniques implemented for unsupervised learning"""
+    """Class with clustering techniques implemented for unsupervised learning."""
 
     @staticmethod
     def perform_kmeans(X: pd.DataFrame, **kwargs):
-        """Static method wrapped in Clustering class which performs Kmeans algorithm
+        """Wrap in Clustering class which performs Kmeans algorithm.
 
         :param X: Dataset with samples
         :type X: pd.DataFrame
@@ -28,7 +30,7 @@ class Clustering:
 
     @staticmethod
     def perform_DBSCAN(X: pd.DataFrame, **kwargs):
-        """Static method wrapped in Clustering class which performs
+        """Wrap in Clustering class which performs.
 
         :param X: Dataset with samples
         :type X: pd.DataFrame
