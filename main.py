@@ -448,7 +448,7 @@ def make_report(
         report.print_line()
         anomalies.perform_autoencoding()
         anomalies.train_autoencoding(epochs=epochs)
-        report.print_autoencoder_validation(anomalies)
+        #report.print_autoencoder_validation(anomalies)
         report.print_autoencoder_threshold(anomalies)
         report.print_autoencoder_error(anomalies)
         report.print_title("Autoencoding Classification Report", 5)

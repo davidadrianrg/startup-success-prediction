@@ -30,11 +30,15 @@ logger.addHandler(handler)
 
 
 class HpDNN:
+    """Class to implement the hyperparameter tunning for the deep neural network."""
+
     def __init__(self):
-        pass
+        """Create an instance of the HpDNN class."""
+        self.best_model = None
+        self.test_set = None
 
     def timed(func):
-        """This decorator prints the execution time for the decorated function."""
+        """Print the execution time for the decorated function."""
 
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -274,7 +278,12 @@ class HpDNN:
                 self.test_set = (X_test, t_test)
                 last_mean = means
 
-    def optimize_DNN(self, *args, **kwargs):
+    def optimize_DNN(self, *args, **kwargs) -> tuple:
+        """Log the time of the perform_optimizing_DNN method.
+
+        :return: A tuple containing the return of the called function and its time log.
+        :rtype: tuple
+        """
         timeDNN_seq = self.perform_optimizing_DNN(*args, **kwargs)
         return (self.best_model, self.test_set), timeDNN_seq
 
@@ -397,6 +406,11 @@ class HpDNN:
                 self.test_set = (X_test, t_test)
                 last_mean = means
 
-    def optimize_DNN_multithread(self, *args, **kwargs):
+    def optimize_DNN_multithread(self, *args, **kwargs) -> tuple:
+        """Log the time of the perform_optimize_DNN_multithread method.
+
+        :return: A tuple containing the return of the called function and its time log.
+        :rtype: tuple
+        """
         timeDNN_thr = self.perform_optimize_DNN_multithread(*args, **kwargs)
         return (self.best_model, self.test_set), timeDNN_thr
