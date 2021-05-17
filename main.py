@@ -185,7 +185,7 @@ def make_report(
     :param best_DNN: Tuple containing the neural network trained
     :type best_DNN: tuple
     :param time_log: Tuple containing the times registered during the training of the models and dnn
-    :type time_log:tuple
+    :type time_log: tuple
     """
     # Processing the data to be passed to the Report class in the right format
     results_tags = []
@@ -448,7 +448,7 @@ def make_report(
         report.print_line()
         anomalies.perform_autoencoding()
         anomalies.train_autoencoding(epochs=epochs)
-        #report.print_autoencoder_validation(anomalies)
+        report.print_autoencoder_validation(anomalies)
         report.print_autoencoder_threshold(anomalies)
         report.print_autoencoder_error(anomalies)
         report.print_title("Autoencoding Classification Report", 5)
