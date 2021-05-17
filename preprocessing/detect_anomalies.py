@@ -104,6 +104,8 @@ class Anomalies:
             self.X_train,
             self.X_train,
             validation_data=(self.X_test, self.X_test),
+            epochs=epochs,
+            batch_size=batch_size,
             **kwargs
         )
 
@@ -190,7 +192,7 @@ class Anomalies:
         e_test = self.autoencoder.predict(self.X_test)
         self.mse_test = np.mean(np.power(self.X_test - e_test, 2), axis=1)
         threshold = np.max(self.mse_train)
-        fig, ax = plt.subplots(figsize=(12, 4))
+        fig, ax = plt.subplots(figsize=figsize)
         ax.plot(range(1, self.X_train.shape[0] + 1), self.mse_train, "b.")
         ax.plot(
             range(
